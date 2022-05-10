@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getCookie } from "cookies-next";
 import { server } from "../config";
 import { CommunityType, UserType, PostType, CommentType } from "./types";
 
@@ -71,16 +70,6 @@ export async function deleteUserById(userId: String) {
   const result: UserType = await res.data;
   return result;
 }
-
-//TODO: Fetch currentUser
-// export async function getCurrentUser() {
-//   const currentUserId = getCookie("user");
-//   let currentUser = null;
-//   if (currentUserId) {
-//     currentUser = await getUserById(currentUserId);
-//   }
-//   return currentUser ?? null;
-// }
 
 //----------------------------
 //Posts server calls

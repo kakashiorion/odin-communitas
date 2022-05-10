@@ -14,14 +14,12 @@ import {
 } from "../icons/Icons";
 import {
   getCommunityById,
-  // getCurrentUser,
   getUserById,
   updatePostById,
   updateUserById,
 } from "../../util/ServerCalls";
 import { useEffect, useState } from "react";
 import moment from "moment";
-import User from "../../models/User";
 import { getCookie } from "cookies-next";
 import router from "next/router";
 

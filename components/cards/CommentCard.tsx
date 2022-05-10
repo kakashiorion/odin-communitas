@@ -17,7 +17,6 @@ import moment from "moment";
 import { CommentType, UserType } from "../../util/types";
 import {
   getChildCommentsByParentId,
-  // getCurrentUser,
   getUserById,
   updateCommentById,
   updateUserById,

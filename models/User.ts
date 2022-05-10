@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import moment from "moment";
 
 const UserSchema = new mongoose.Schema({
   username: {
@@ -54,10 +53,6 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
-
-UserSchema.virtual("joinDate").get(function () {
-  return moment(this.createdAt).format("DD MMM YYYY");
 });
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);
