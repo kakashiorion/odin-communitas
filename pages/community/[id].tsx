@@ -5,7 +5,7 @@ import PostCard from "../../components/cards/PostCard";
 import Header from "../../components/Header";
 import { BackIcon } from "../../components/icons/Icons";
 import commImage from "../../public/commDefault.jpeg";
-import { CommunityType, PostType, UserType } from "../../util/types";
+import { CommunityType, PostType } from "../../util/types";
 import { useEffect, useState } from "react";
 import {
   getCommunities,

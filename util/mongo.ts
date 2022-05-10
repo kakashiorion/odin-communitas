@@ -27,10 +27,6 @@ async function dbConnect() {
   }
 
   if (!cached.promise) {
-    // const opts = {
-    //   bufferCommands: false,
-    // };
-
     cached.promise = await mongoose.connect(MONGODB_URL).then((mongoose) => {
       return mongoose;
     });
