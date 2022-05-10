@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+const globalAny: any = global;
+
 const MONGODB_URL: string = process.env.MONGODB_URL!;
 
 if (!MONGODB_URL) {
@@ -13,10 +15,10 @@ if (!MONGODB_URL) {
  * in development. This prevents connections growing exponentially
  * during API Route usage.
  */
-let cached = global.mongoose;
+let cached = globalAny.mongoose;
 
 if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+  cached = globalAny.mongoose = { conn: null, promise: null };
 }
 
 async function dbConnect() {
