@@ -23,15 +23,21 @@ export default function RisingCommunitiesCard() {
   const emptyUser: any = new Object();
   const [risingComms, setRisingComms] = useState(emptyComms);
   const [cUser, setCUser] = useState(emptyUser);
+  const loggedInUser = getCookie("user");
   const fetchData = async () => {
     const comms = await getCommunities();
-    const cUser = await getUserById(getCookie("user"));
+    let cUser;
+    if (loggedInUser) {
+      cUser = await getUserById(loggedInUser.toString());
+    }
     return { comms, cUser };
   };
   useEffect(() => {
     fetchData().then((data) => {
       setRisingComms(data.comms);
-      setCUser(data.cUser);
+      if (data.cUser) {
+        setCUser(data.cUser);
+      }
     });
   }, []);
 
