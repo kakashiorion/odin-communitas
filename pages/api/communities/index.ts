@@ -12,10 +12,8 @@ export default async function handler(req: any, res: any) {
       res.status(200).json(communities);
       break;
     case "POST":
-      // console.log({ req });
       const createdCommunity = await Community.create(body);
       res.status(200).json(createdCommunity);
-      // console.log({ res });
       break;
   }
 }
