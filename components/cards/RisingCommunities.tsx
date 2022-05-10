@@ -20,24 +20,15 @@ function sortRisingComm(c: CommunityType[]) {
 
 export default function RisingCommunitiesCard() {
   const emptyComms: CommunityType[] = [];
-  const emptyUser: any = new Object();
   const [risingComms, setRisingComms] = useState(emptyComms);
-  const [cUser, setCUser] = useState(emptyUser);
-  const loggedInUser = getCookie("user");
   const fetchData = async () => {
     const comms = await getCommunities();
-    let cUser;
-    if (loggedInUser) {
-      cUser = await getUserById(loggedInUser.toString());
-    }
-    return { comms, cUser };
+
+    return { comms };
   };
   useEffect(() => {
     fetchData().then((data) => {
       setRisingComms(data.comms);
-      if (data.cUser) {
-        setCUser(data.cUser);
-      }
     });
   }, []);
 
@@ -57,12 +48,7 @@ export default function RisingCommunitiesCard() {
       </div>
       <hr />
       {finalComms.map((c: CommunityType) => (
-        <RisingCommunity
-          commName={c.name}
-          commId={c._id}
-          key={c._id}
-          cUser={cUser}
-        />
+        <RisingCommunity commName={c.name} commId={c._id} key={c._id} />
       ))}
     </div>
   );
@@ -71,12 +57,24 @@ export default function RisingCommunitiesCard() {
 interface RisingCommunityProps {
   commId: string;
   commName: string;
-  cUser: UserType;
 }
 function RisingCommunity(props: RisingCommunityProps) {
-  const [joinStatus, setJoinStatus] = useState(
-    props.cUser?.communities.includes(props.commId)
-  );
+  const [joinStatus, setJoinStatus] = useState(false);
+  const loggedInUser = getCookie("user");
+  const fetchData = async () => {
+    let cUser;
+    if (loggedInUser) {
+      cUser = await getUserById(loggedInUser.toString());
+    }
+    return { cUser };
+  };
+  useEffect(() => {
+    fetchData().then((data) => {
+      if (data.cUser) {
+        setJoinStatus(data.cUser.communities.includes(props.commId));
+      }
+    });
+  }, []);
   return (
     <div className="w-full flex justify-between p-2 bg-white">
       <Link href={`/community/${props.commId}`}>
