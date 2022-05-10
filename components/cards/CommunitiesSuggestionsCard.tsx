@@ -60,7 +60,7 @@ export default function CommunitiesSuggestionsCard() {
     <div className="w-full rounded shadow-md p-2 bg-white">
       <CommunityExpandCard
         catName="POPULAR COMMUNITIES"
-        key="Popular"
+        key="PopularComm"
         comms={allPopularComms}
         isExpanded={activeCategory == "Popular"}
         onClick={() => {
@@ -105,7 +105,11 @@ function CommunityExpandCard(props: CommunityExpandCardProps) {
         <p className="text-sm font-medium">{props.catName}</p>
         {props.isExpanded ? <CollapseIcon /> : <ExpandIcon />}
       </div>
-      <CommunityChips isExpanded={props.isExpanded} comms={props.comms} />
+      <CommunityChips
+        isExpanded={props.isExpanded}
+        comms={props.comms}
+        catName={props.catName}
+      />
     </>
   );
 }
@@ -113,6 +117,7 @@ function CommunityExpandCard(props: CommunityExpandCardProps) {
 interface CommunityChipsProps {
   isExpanded: boolean;
   comms: CommunityType[];
+  catName: string;
 }
 function CommunityChips(props: CommunityChipsProps) {
   return (
@@ -122,7 +127,11 @@ function CommunityChips(props: CommunityChipsProps) {
       }
     >
       {props.comms.map((c) => (
-        <CommunityChip commName={c.name} commId={c._id} key={c._id} />
+        <CommunityChip
+          commName={c.name}
+          commId={c._id}
+          key={c._id + props.catName}
+        />
       ))}
     </div>
   );

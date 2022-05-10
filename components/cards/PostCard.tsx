@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { PostType } from "../../util/types";
+import { PostType, UserType } from "../../util/types";
 import JoinButton from "../buttons/JoinButton";
 import {
   UpIcon,
@@ -8,18 +8,26 @@ import {
   SaveIcon,
   ShareIcon,
   CommentIcon,
+  SavedIcon,
+  UpvotedIcon,
+  DownvotedIcon,
 } from "../icons/Icons";
 import {
   getCommunityById,
-  getCurrentUser,
+  // getCurrentUser,
   getUserById,
+  updatePostById,
+  updateUserById,
 } from "../../util/ServerCalls";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import User from "../../models/User";
+import { getCookie } from "cookies-next";
+import router from "next/router";
 
 interface PostCardProps {
   hideCommunity?: boolean;
-  showWithDesc?: boolean;
+  showWithDesc: boolean;
   post: PostType;
 }
 export default function PostCard(props: PostCardProps) {
@@ -52,22 +60,97 @@ interface PostHeaderProps {
 function PostHeader(props: PostHeaderProps) {
   return (
     <div className="w-full px-1 flex items-center gap-3 ">
-      <PostUpvotes
-        upvoteCount={
-          props.post.upvotersId.length - props.post.downvotersId.length
-        }
-      />
+      <PostUpvotes post={props.post} />
       <PostInfo hideCommunity={props.hideCommunity} post={props.post} />
     </div>
   );
 }
 
-function PostUpvotes(props: { upvoteCount: number }) {
+function PostUpvotes(props: { post: PostType }) {
+  const [upvoted, setUpvoted] = useState(false);
+  const [downvoted, setDownvoted] = useState(false);
+  const loggedInUser = getCookie("user");
+  const fetchData = async () => {
+    let cUser;
+    if (loggedInUser) {
+      cUser = await getUserById(loggedInUser.toString());
+    }
+    return { cUser };
+  };
+  useEffect(() => {
+    fetchData().then((data) => {
+      if (data.cUser && props.post.upvotersId.includes(data.cUser._id))
+        setUpvoted(true);
+      else if (data.cUser && props.post.downvotersId.includes(data.cUser._id))
+        setDownvoted(true);
+    });
+  }, []);
+
+  async function upvotePost() {
+    const loggedInUser = getCookie("user");
+    if (!loggedInUser) {
+      router.push("/login");
+    } else {
+      let cUser: UserType = await getUserById(loggedInUser.toString());
+      if (upvoted) {
+        setUpvoted(false);
+        let removedList = props.post.upvotersId.filter(
+          (u: string) => u != cUser._id
+        );
+        props.post.upvotersId = removedList;
+        await updatePostById(props.post._id, props.post);
+      } else {
+        setUpvoted(true);
+        setDownvoted(false);
+        props.post.upvotersId.push(cUser._id);
+        let removedList = props.post.downvotersId.filter(
+          (u: string) => u != cUser._id
+        );
+        props.post.downvotersId = removedList;
+        await updatePostById(props.post._id, props.post);
+      }
+    }
+  }
+
+  async function downvotePost() {
+    const loggedInUser = getCookie("user");
+    if (!loggedInUser) {
+      router.push("/login");
+    } else {
+      let cUser: UserType = await getUserById(loggedInUser.toString());
+      if (downvoted) {
+        setDownvoted(false);
+        let removedList = props.post.downvotersId.filter(
+          (u: string) => u != cUser._id
+        );
+        props.post.downvotersId = removedList;
+        await updatePostById(props.post._id, props.post);
+      } else {
+        setUpvoted(false);
+        setDownvoted(true);
+        props.post.downvotersId.push(cUser._id);
+        let removedList = props.post.upvotersId.filter(
+          (u: string) => u != cUser._id
+        );
+        props.post.upvotersId = removedList;
+        await updatePostById(props.post._id, props.post);
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col gap-0 justify-center items-center ">
-      <UpIcon />
-      <UpvoteCount upvoteCount={props.upvoteCount} />
-      <DownIcon />
+      <div onClick={() => upvotePost()}>
+        {upvoted ? <UpvotedIcon /> : <UpIcon />}
+      </div>
+      <UpvoteCount
+        upvoteCount={
+          props.post.upvotersId.length - props.post.downvotersId.length
+        }
+      />
+      <div onClick={() => downvotePost()}>
+        {downvoted ? <DownvotedIcon /> : <DownIcon />}
+      </div>
     </div>
   );
 }
@@ -94,19 +177,20 @@ interface PostTopLineProps {
   post: PostType;
 }
 function PostTopLine(props: PostTopLineProps) {
-  const emptyUser: any = new Object();
-  const [cUser, setCUser] = useState(emptyUser);
-  const fetchData = async () => {
-    const currentUser = await getCurrentUser();
-    return { currentUser };
-  };
   const [joinStatus, setJoinStatus] = useState(false);
+  const loggedInUser = getCookie("user");
   useEffect(() => {
+    const fetchData = async () => {
+      let cUser;
+      if (loggedInUser) {
+        cUser = await getUserById(loggedInUser.toString());
+      }
+      return { cUser };
+    };
     fetchData().then((data) => {
-      setCUser(data.currentUser);
-      setJoinStatus(
-        data.currentUser.communities.includes(props.post.communityId)
-      );
+      if (data.cUser) {
+        setJoinStatus(data.cUser.communities.includes(props.post.communityId));
+      }
     });
   }, [props.post.communityId]);
   return (
@@ -117,7 +201,6 @@ function PostTopLine(props: PostTopLineProps) {
       ) : (
         <JoinButton
           commId={props.post.communityId}
-          currentUser={cUser}
           joinStatus={joinStatus}
           setJoinStatus={setJoinStatus}
         />
@@ -214,7 +297,7 @@ interface PostTitleProps {
 function PostTitle(props: PostTitleProps) {
   return (
     <Link href={"/post/" + props.postId} passHref>
-      <a className="text-lg md:text-xl font-medium hover:text-indigo-600">
+      <a className="text-base md:text-lg font-medium hover:text-indigo-600">
         {props.postTitle}
       </a>
     </Link>
@@ -264,13 +347,13 @@ function PostDescription(props: PostDescriptionProps) {
 
 function PostAction(props: { post: PostType }) {
   return (
-    <div className="w-full py-1 flex items-center gap-3 ">
+    <div className="w-full flex items-center gap-3 ">
       <Comments
         postId={props.post._id}
         postComments={props.post.commentsId.length}
       />
       <Share />
-      <Save />
+      <Save postId={props.post._id} />
     </div>
   );
 }
@@ -299,11 +382,54 @@ function Share() {
   );
 }
 
-function Save() {
+function Save(props: { postId: string }) {
+  const [saved, setSaved] = useState(false);
+  const loggedInUser = getCookie("user");
+  const fetchData = async () => {
+    let cUser;
+    if (loggedInUser) {
+      cUser = await getUserById(loggedInUser.toString());
+    }
+    return { cUser };
+  };
+  useEffect(() => {
+    fetchData().then((data) => {
+      if (data.cUser && data.cUser.savedPostsId.includes(props.postId)) {
+        setSaved(true);
+      }
+    });
+  }, []);
+
+  async function savePost() {
+    const loggedInUser = getCookie("user");
+    if (!loggedInUser) {
+      router.push("/login");
+    } else {
+      let cUser: UserType = await getUserById(loggedInUser.toString());
+      if (saved) {
+        setSaved(false);
+        let removedList = cUser.savedPostsId.filter(
+          (p: string) => p != props.postId
+        );
+        cUser.savedPostsId = removedList;
+        await updateUserById(cUser._id, cUser);
+      } else {
+        setSaved(true);
+        cUser.savedPostsId.push(props.postId);
+        await updateUserById(cUser._id, cUser);
+      }
+    }
+  }
+
   return (
-    <div className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-indigo-600">
-      <SaveIcon />
-      <p className="text-xs md:text-sm">Save</p>
+    <div
+      className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-indigo-600"
+      onClick={() => savePost()}
+    >
+      {saved ? <SavedIcon /> : <SaveIcon />}
+      <p className={`text-xs md:text-sm ${saved ? "text-indigo-600" : ""}`}>
+        {saved ? "Saved" : "Save"}
+      </p>
     </div>
   );
 }

@@ -22,7 +22,7 @@ function PostsList(props: { posts: PostType[] }) {
       {sortedPosts.map((p: PostType) => (
         <PostCard
           hideCommunity={false}
-          showWithDesc={true}
+          showWithDesc={false}
           post={p}
           key={p._id}
         />

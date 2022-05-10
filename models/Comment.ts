@@ -15,7 +15,7 @@ const CommentSchema = new mongoose.Schema({
     required: true,
   },
   parentCommentId: {
-    type: mongoose.Schema.Types.ObjectId, //Parent Comment for which this comment was a reply, if any
+    type: String, //Parent Comment for which this comment was a reply, if any
     default: "",
   },
   upvotersId: {

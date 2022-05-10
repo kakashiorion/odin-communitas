@@ -9,14 +9,14 @@ import { useEffect, useState } from "react";
 import {
   getCommunities,
   getCommunityById,
-  getCurrentUser,
+  getUserById,
 } from "../../util/ServerCalls";
+import { getCookie } from "cookies-next";
 
 export async function getStaticProps() {
   return {
     props: {
       comms: await getCommunities(),
-      cUser: await getCurrentUser(),
     },
   };
 }
@@ -42,14 +42,13 @@ function sortComm(c: CommunityType[], sAlgo: string) {
 
 interface AllCommunityPageProps {
   comms: CommunityType[];
-  cUser: UserType;
 }
 export default function AllCommunityPage(props: AllCommunityPageProps) {
   const [sort, setSort] = useState("Name"); //Sort communities by 'Name' by default
 
   return (
     <div className="flex flex-col gap-4 items-center">
-      <Header type="loggedin" />
+      <Header />
       <div className="flex flex-col p-6 gap-2 justify-start items-center md:w-[768px] w-full ">
         <CommunitiesSorter setSort={setSort} />
         {sortComm(props.comms, sort).map((comm: CommunityType) => (
@@ -59,7 +58,6 @@ export default function AllCommunityPage(props: AllCommunityPageProps) {
             commName={comm.name}
             commImageUrl={comm.imageUrl}
             commDesc={comm.description}
-            cUser={props.cUser}
           />
         ))}
         <CreateCommunityButton />
@@ -73,21 +71,9 @@ interface CommunityItemProps {
   commName: string;
   commImageUrl: string;
   commDesc: string;
-  cUser: UserType;
 }
 function CommunityItem(props: CommunityItemProps) {
-  // function getValidImageSource(s: string) {
-  //   let url;
-  //   try {
-  //     url = new URL(s);
-  //   } catch (_) {
-  //     return false;
-  //   }
-  //   return url.protocol === "http:" || url.protocol === "https:";
-  // }
-  const [joinStatus, setJoinStatus] = useState(
-    props.cUser.communities.includes(props.commId)
-  );
+  const [joinStatus, setJoinStatus] = useState(false);
   function getImageURL() {
     if (!props.commImageUrl || props.commImageUrl == "") {
       return sampleCommImage;
@@ -99,10 +85,14 @@ function CommunityItem(props: CommunityItemProps) {
   useEffect(() => {
     const fetchData = async () => {
       const community: CommunityType = await getCommunityById(props.commId);
-      return { community };
+      const cUser = await getUserById(getCookie("user")!.toString());
+      return { community, cUser };
     };
     fetchData().then((data) => {
       setCommMemberCount(data.community.members.length);
+      if (data.cUser) {
+        setJoinStatus(data.cUser.communities.includes(props.commId));
+      }
     });
   });
 
@@ -129,7 +119,6 @@ function CommunityItem(props: CommunityItemProps) {
         </p>
         <JoinButton
           commId={props.commId}
-          currentUser={props.cUser}
           joinStatus={joinStatus}
           setJoinStatus={setJoinStatus}
         />

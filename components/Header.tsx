@@ -7,36 +7,38 @@ import {
   LogoutIcon,
   ProfileIcon,
 } from "./icons/Icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NewPostButton from "./buttons/NewPostButton";
 import SearchBar from "./SearchBar";
 import Link from "next/link";
 import Image from "next/image";
 import defaultProfileImage from "../public/defaultProfilePic.webp";
-import { removeCookies } from "cookies-next";
+import { getCookie, removeCookies } from "cookies-next";
+import { getUserById } from "../util/ServerCalls";
+import { UserType } from "../util/types";
 
 interface HeaderProps {
-  type: string;
+  type?: string;
 }
 export default function Header(props: HeaderProps) {
-  function getComponent(t: string) {
-    if (t == "loggedout") {
-      return <BothActionButtons />;
-    } else if (t == "onlylogin") {
-      return <OnlyLoginButton />;
-    } else if (t == "onlysignup") {
-      return <OnlySignupButton />;
-    } else if (t == "loggedin") {
+  const loggedInUser = getCookie("user");
+  function getComponent() {
+    if (loggedInUser) {
       return <UserInfo />;
+    } else if (props.type == "onlylogin") {
+      return <OnlyLoginButton />;
+    } else if (props.type == "onlysignup") {
+      return <OnlySignupButton />;
+    } else {
+      return <BothActionButtons />;
     }
   }
-  let loginType: string = props.type;
 
   return (
     <div className="shadow-md w-full bg-white h-14 z-20 top-0 gap-4 sticky flex justify-between items-center py-2 px-4">
       <SiteInfo />
       <SearchBar />
-      <div className="">{getComponent(loginType)}</div>
+      {getComponent()}
     </div>
   );
 }
@@ -47,7 +49,7 @@ function Logo() {
 
 function SiteName() {
   return (
-    <p className="text-2xl font-semibold text-indigo-600 hidden md:inline">
+    <p className="text-2xl p-1 font-semibold text-indigo-600 hidden md:inline hover:bg-gray-100">
       Communitas
     </p>
   );
@@ -95,6 +97,19 @@ function OnlySignupButton() {
 
 function UserInfo() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [user, setUser] = useState({} as UserType);
+
+  useEffect(() => {
+    async function fetchData() {
+      const cUser = await getUserById(getCookie("user")!.toString());
+      return { cUser };
+    }
+    fetchData().then((data) => {
+      if (data.cUser) {
+        setUser(data.cUser);
+      }
+    });
+  }, []);
 
   const handleClick = (e: any) => {
     e.preventDefault();
@@ -105,8 +120,8 @@ function UserInfo() {
     <div className="flex gap-3 items-center">
       <NewPostButton />
       <div className="flex gap-3 items-center">
-        <Avatar />
-        <p className="text-sm md:text-base hidden md:inline">User1234</p>
+        <Avatar userImageUrl={user.profileImageUrl} />
+        <p className="text-sm md:text-base hidden md:inline">{user.username}</p>
         <a className="text-indigo-600">
           {isExpanded ? (
             <CollapseIcon onClick={handleClick} />
@@ -114,7 +129,7 @@ function UserInfo() {
             <ExpandIcon onClick={handleClick} />
           )}
         </a>
-        {isExpanded ? <UserDropDown /> : <></>}
+        {isExpanded ? <UserDropDown userId={user._id} /> : <></>}
       </div>
     </div>
   );
@@ -138,15 +153,15 @@ function Avatar(props: AvatarProps) {
   );
 }
 
-function UserDropDown() {
+function UserDropDown(props: { userId: string }) {
   const router = useRouter();
   const logOut = () => {
-    removeCookies("token");
+    removeCookies("user");
     router.replace("/");
   };
 
   const viewProfile = () => {
-    router.push("/profile");
+    router.push("/user/" + props.userId);
   };
 
   return (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import CommentButton from "../../components/buttons/CommentButton";
+import AddCommentButton from "../../components/buttons/AddCommentButton";
 import CommentCard from "../../components/cards/CommentCard";
 import PostCard from "../../components/cards/PostCard";
 import Header from "../../components/Header";
@@ -35,7 +35,7 @@ interface PostPageProps {
 export default function PostPage(props: PostPageProps) {
   return (
     <div className="flex flex-col gap-4 items-center">
-      <Header type="loggedin" />
+      <Header />
       <PostColumn post={props.post} />
     </div>
   );
@@ -59,25 +59,35 @@ function PostColumn(props: PostColumnProps) {
   return (
     <div className="flex flex-col gap-3 w-full md:w-[768px] p-3 ">
       <PostCard showWithDesc={true} post={props.post} />
-      <AddComment />
+      <AddParentComment postId={props.post._id} />
       <hr />
       <CommentColumn parentComments={parentComments} />
     </div>
   );
 }
 
-function AddComment() {
+interface AddParentComentProps {
+  postId: string;
+}
+function AddParentComment(props: AddParentComentProps) {
   const [commentText, setCommentText] = useState("");
   return (
     <div className="bg-white shadow-md rounded flex flex-col w-full p-3 gap-2">
       <textarea
         rows={2}
         placeholder="Share your thoughts!"
+        value={commentText}
         onChange={(e) => setCommentText(e.target.value)}
         className="w-full bg-gray-100 p-2 text-sm md:text-base outline-indigo-600"
       ></textarea>
       <div className="w-full flex justify-end">
-        <CommentButton disabled={commentText == ""} text="Add Comment" />
+        <AddCommentButton
+          disabled={commentText == ""}
+          buttonText="ADD COMMENT"
+          content={commentText}
+          postId={props.postId}
+          setCommentText={setCommentText}
+        />
       </div>
     </div>
   );

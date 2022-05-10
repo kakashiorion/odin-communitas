@@ -2,9 +2,9 @@ import JoinButton from "../buttons/JoinButton";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CommunityType, UserType } from "../../util/types";
-import { getCommunities, getCurrentUser } from "../../util/ServerCalls";
+import { getCommunities, getUserById } from "../../util/ServerCalls";
 import moment from "moment";
-import User from "../../models/User";
+import { getCookie } from "cookies-next";
 
 function sortRisingComm(c: CommunityType[]) {
   const now = new Date();
@@ -25,7 +25,7 @@ export default function RisingCommunitiesCard() {
   const [cUser, setCUser] = useState(emptyUser);
   const fetchData = async () => {
     const comms = await getCommunities();
-    const cUser = await getCurrentUser();
+    const cUser = await getUserById(getCookie("user"));
     return { comms, cUser };
   };
   useEffect(() => {
@@ -69,7 +69,7 @@ interface RisingCommunityProps {
 }
 function RisingCommunity(props: RisingCommunityProps) {
   const [joinStatus, setJoinStatus] = useState(
-    props.cUser.communities.includes(props.commId)
+    props.cUser?.communities.includes(props.commId)
   );
   return (
     <div className="w-full flex justify-between p-2 bg-white">
@@ -80,7 +80,6 @@ function RisingCommunity(props: RisingCommunityProps) {
       </Link>
       <JoinButton
         commId={props.commId}
-        currentUser={props.cUser}
         joinStatus={joinStatus}
         setJoinStatus={setJoinStatus}
       />

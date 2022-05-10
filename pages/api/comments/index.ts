@@ -11,7 +11,7 @@ export default async function handler(req: any, res: any) {
       const Comments = await Comment.find();
       res.status(200).json(Comments);
       break;
-    case "Comment":
+    case "POST":
       const createdComment = await Comment.create(body);
       res.status(201).json(createdComment);
       break;

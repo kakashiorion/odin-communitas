@@ -1,8 +1,8 @@
+import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
-import Community from "../../models/Community";
 import {
   createCommunity,
-  getCurrentUser,
+  getUserById,
   updateUserById,
 } from "../../util/ServerCalls";
 import { CommunityType, UserType } from "../../util/types";
@@ -24,21 +24,26 @@ export default function StartCommunityButton(props: StartCommunityButtonProps) {
 
   async function createComm(newCommObj: any) {
     //Get current user
-    let currentUser: UserType = await getCurrentUser();
+    const loggedInUser = getCookie("user");
+    if (!loggedInUser) {
+      router.push("/login");
+    } else {
+      let currentUser: UserType = await getUserById(loggedInUser.toString());
 
-    //Create new community
-    newCommObj.creatorId = currentUser._id;
-    newCommObj.members = [currentUser._id];
-    const createdCommunity: CommunityType = await createCommunity(newCommObj);
+      //Create new community
+      newCommObj.creatorId = currentUser._id;
+      newCommObj.members = [currentUser._id];
+      const createdCommunity: CommunityType = await createCommunity(newCommObj);
 
-    //update user's communities
-    let userCommList = currentUser.communities;
-    userCommList.push(createdCommunity._id);
-    currentUser.communities = userCommList;
-    await updateUserById(currentUser._id, currentUser);
+      //update user's communities
+      let userCommList = currentUser.communities;
+      userCommList.push(createdCommunity._id);
+      currentUser.communities = userCommList;
+      await updateUserById(currentUser._id, currentUser);
 
-    //redirect to the newly created community page
-    router.push(`/community/${createdCommunity._id}`);
+      //redirect to the newly created community page
+      router.push(`/community/${createdCommunity._id}`);
+    }
   }
 
   return (

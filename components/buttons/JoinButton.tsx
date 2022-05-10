@@ -1,58 +1,53 @@
-import { useEffect, useState } from "react";
+import { getCookie } from "cookies-next";
+import { useRouter } from "next/router";
 import {
   getCommunityById,
-  getCurrentUser,
+  getUserById,
   updateCommunityById,
   updateUserById,
 } from "../../util/ServerCalls";
-import { CommunityType, UserType } from "../../util/types";
+import { CommunityType } from "../../util/types";
 
 interface JoinButtonProps {
   commId: string;
-  currentUser: UserType;
   joinStatus: boolean;
   setJoinStatus: (b: boolean) => void;
 }
 
 export default function JoinButton(props: JoinButtonProps) {
-  // let currentUser: UserType;
-  // const fetchData = async () => {
-  //   const userfromDB = await getCurrentUser();
-  //   return { userfromDB };
-  // };
-  // useEffect(() => {
-  //   fetchData().then((data) => {
-  //     currentUser = data.userfromDB;
-  //     setJoinStatus(currentUser.communities.includes(props.commId));
-  //   });
-  // }, [joinStatus]);
-
+  const router = useRouter();
   async function joinCommunity() {
-    if (props.joinStatus) {
-      //Remove from the list of user's joined communities
-      const removedCommunities: string[] = props.currentUser.communities.filter(
-        (c) => c != props.commId
-      );
-      props.currentUser.communities = removedCommunities;
-      await updateUserById(props.currentUser._id, props.currentUser);
-
-      //Remove user as a member of the community
-      const community: CommunityType = await getCommunityById(props.commId);
-      community.members = community.members.filter(
-        (u) => u != props.currentUser._id
-      );
-      await updateCommunityById(props.commId, community);
-      props.setJoinStatus(false);
+    const loggedInUser = getCookie("user");
+    if (!loggedInUser) {
+      router.push("/login");
     } else {
-      //Add community to user's joined list
-      props.currentUser.communities.push(props.commId);
-      await updateUserById(props.currentUser._id, props.currentUser);
+      let currentUser = await getUserById(loggedInUser.toString());
+      if (props.joinStatus) {
+        //Remove from the list of user's joined communities
+        const removedCommunities: string[] = currentUser.communities.filter(
+          (c) => c != props.commId
+        );
+        currentUser.communities = removedCommunities;
+        await updateUserById(currentUser._id, currentUser);
 
-      //Add user as a member of the community
-      const community: CommunityType = await getCommunityById(props.commId);
-      community.members.push(props.currentUser._id);
-      await updateCommunityById(props.commId, community);
-      props.setJoinStatus(true);
+        //Remove user as a member of the community
+        const community: CommunityType = await getCommunityById(props.commId);
+        community.members = community.members.filter(
+          (u) => u != currentUser?._id
+        );
+        await updateCommunityById(props.commId, community);
+        props.setJoinStatus(false);
+      } else {
+        //Add community to user's joined list
+        currentUser.communities.push(props.commId);
+        await updateUserById(currentUser._id, currentUser);
+
+        //Add user as a member of the community
+        const community: CommunityType = await getCommunityById(props.commId);
+        community.members.push(currentUser._id);
+        await updateCommunityById(props.commId, community);
+        props.setJoinStatus(true);
+      }
     }
   }
   return (

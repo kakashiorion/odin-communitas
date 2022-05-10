@@ -10,9 +10,10 @@ import { useEffect, useState } from "react";
 import {
   getCommunities,
   getCommunityById,
-  getCurrentUser,
   getPostsByCommunityId,
+  getUserById,
 } from "../../util/ServerCalls";
+import { getCookie } from "cookies-next";
 
 export async function getStaticPaths() {
   const results: CommunityType[] = await getCommunities();
@@ -30,7 +31,6 @@ export async function getStaticProps({ params }: { params: { id: string } }) {
     props: {
       community: await getCommunityById(params.id),
       posts: await getPostsByCommunityId(params.id),
-      cUser: await getCurrentUser(),
     },
   };
 }
@@ -38,16 +38,15 @@ export async function getStaticProps({ params }: { params: { id: string } }) {
 interface CommunityPageProps {
   community: CommunityType;
   posts: PostType[];
-  cUser: UserType;
 }
 export default function CommunityPage(props: CommunityPageProps) {
   const posts: PostType[] = props.posts;
 
   return (
     <div className="flex flex-col gap-4 items-center">
-      <Header type="loggedin" />
+      <Header />
       <AllCommunitiesBackLink />
-      <CommunityData comm={props.community} cUser={props.cUser} />
+      <CommunityData comm={props.community} />
       <CommunityContent posts={posts} />
     </div>
   );
@@ -66,20 +65,25 @@ function AllCommunitiesBackLink() {
 
 interface CommunityDataProps {
   comm: CommunityType;
-  cUser: UserType;
 }
 function CommunityData(props: CommunityDataProps) {
   const [commMemberCount, setCommMemberCount] = useState(0);
-  const [joinStatus, setJoinStatus] = useState(
-    props.cUser.communities.includes(props.comm._id)
-  );
+  const [joinStatus, setJoinStatus] = useState(false);
+  const loggedInUser = getCookie("user");
   useEffect(() => {
     const fetchData = async () => {
       const community: CommunityType = await getCommunityById(props.comm._id);
-      return { community };
+      let cUser;
+      if (loggedInUser) {
+        cUser = await getUserById(loggedInUser.toString());
+      }
+      return { community, cUser };
     };
     fetchData().then((data) => {
       setCommMemberCount(data.community.members.length);
+      if (data.cUser) {
+        setJoinStatus(data.cUser.communities.includes(props.comm._id));
+      }
     });
   });
   return (
@@ -104,7 +108,6 @@ function CommunityData(props: CommunityDataProps) {
         <div className="flex flex-col items-end justify-center gap-2">
           <JoinStatus
             commId={props.comm._id}
-            cUser={props.cUser}
             joinStatus={joinStatus}
             setJoinStatus={setJoinStatus}
           />
@@ -133,7 +136,6 @@ function CommunityDescription(props: CommunityDescriptionProps) {
 
 interface JoinStatusProps {
   commId: string;
-  cUser: UserType;
   joinStatus: boolean;
   setJoinStatus: (b: boolean) => void;
 }
@@ -142,7 +144,6 @@ function JoinStatus(props: JoinStatusProps) {
     <div>
       <JoinButton
         commId={props.commId}
-        currentUser={props.cUser}
         joinStatus={props.joinStatus}
         setJoinStatus={props.setJoinStatus}
       />
@@ -223,7 +224,12 @@ function CommunityPosts(props: CommunityPostsProps) {
     <div className="flex flex-col gap-3 py-3">
       {posts.length > 0 ? (
         posts.map((p: PostType) => (
-          <PostCard hideCommunity={true} key={p._id} post={p} />
+          <PostCard
+            hideCommunity={true}
+            key={p._id}
+            post={p}
+            showWithDesc={true}
+          />
         ))
       ) : (
         <div className="w-full flex justify-center">No posts yet!</div>

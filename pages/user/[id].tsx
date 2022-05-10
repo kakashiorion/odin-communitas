@@ -38,7 +38,7 @@ interface ProfilePageProps {
 export default function ProfilePage(props: ProfilePageProps) {
   return (
     <div className="flex flex-col gap-3 md:gap-4 items-center">
-      <Header type="loggedin" />
+      <Header />
       <ProfileSection user={props.user} />
       <UserContent user={props.user} />
     </div>
@@ -225,14 +225,18 @@ export function PostsContent(props: PostsContentProps) {
   });
   return (
     <div className="flex flex-col rounded-b-xl gap-3 w-full justify-center">
-      {userPosts.map((p) => (
-        <PostCard
-          post={p}
-          hideCommunity={false}
-          showWithDesc={false}
-          key={p._id}
-        />
-      ))}
+      {userPosts.length > 0 ? (
+        userPosts.map((p) => (
+          <PostCard
+            post={p}
+            hideCommunity={false}
+            showWithDesc={false}
+            key={p._id}
+          />
+        ))
+      ) : (
+        <p className="p-2 flex justify-center">No posts yet!</p>
+      )}
     </div>
   );
 }
@@ -254,9 +258,11 @@ export function CommentsContent(props: CommentsContentProps) {
   });
   return (
     <div className="flex flex-col rounded-b-xl gap-3 w-full justify-center">
-      {userComments.map((c) => (
-        <CommentCard comment={c} key={c._id} />
-      ))}
+      {userComments.length > 0 ? (
+        userComments.map((c) => <CommentCard comment={c} key={c._id} />)
+      ) : (
+        <p className="p-2 flex justify-center">No comments yet!</p>
+      )}
     </div>
   );
 }
