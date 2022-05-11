@@ -10,9 +10,6 @@ export async function getServerSideProps({ req, res }: { req: any; res: any }) {
         permanent: false,
         destination: "/",
       },
-      props: {
-        loggedInUser: loggedInUser,
-      },
     };
   }
   return {

@@ -272,10 +272,7 @@ function PostUser(props: PostUserProps) {
 }
 function PostTime(props: { pTimeAgo: string }) {
   return (
-    <p className="text-[10px] md:text-xs whitespace-nowrap">
-      {" "}
-      {props.pTimeAgo}
-    </p>
+    <p className="text-[10px] md:text-xs whitespace-nowrap">{props.pTimeAgo}</p>
   );
 }
 

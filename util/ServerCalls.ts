@@ -9,7 +9,7 @@ export async function getCommunities() {
   const result: CommunityType[] = await res.data;
   return result;
 }
-export async function getCommunityById(communityId: String) {
+export async function getCommunityById(communityId: string) {
   const res = await axios.get(`${server}/api/communities/${communityId}`);
   const result: CommunityType = await res.data;
   return result;
@@ -22,7 +22,7 @@ export async function createCommunity(communityObject: CommunityType) {
 }
 
 export async function updateCommunityById(
-  communityId: String,
+  communityId: string,
   communityObject: CommunityType
 ) {
   const res = await axios.put(
@@ -33,7 +33,7 @@ export async function updateCommunityById(
   return result;
 }
 
-export async function deleteCommunityById(communityId: String) {
+export async function deleteCommunityById(communityId: string) {
   const res = await axios.delete(`${server}/api/communities/${communityId}`);
   const result: CommunityType = await res.data;
   return result;
@@ -59,13 +59,13 @@ export async function createUser(userObject: UserType) {
   return result;
 }
 
-export async function updateUserById(userId: String, userObject: UserType) {
+export async function updateUserById(userId: string, userObject: UserType) {
   const res = await axios.put(`${server}/api/users/${userId}`, userObject);
   const result: UserType = await res.data;
   return result;
 }
 
-export async function deleteUserById(userId: String) {
+export async function deleteUserById(userId: string) {
   const res = await axios.delete(`${server}/api/users/${userId}`);
   const result: UserType = await res.data;
   return result;
@@ -79,19 +79,19 @@ export async function getPosts() {
   return result;
 }
 
-export async function getPostById(postId: String) {
+export async function getPostById(postId: string) {
   const res = await axios.get(`${server}/api/posts/${postId}`);
   const result: PostType = await res.data;
   return result;
 }
 
-export async function getPostsByCommunityId(communityId: String) {
+export async function getPostsByCommunityId(communityId: string) {
   const res = await axios.get(`${server}/api/posts/communities/${communityId}`);
   const result: PostType[] = await res.data;
   return result;
 }
 
-export async function getPostsByUserId(userId: String) {
+export async function getPostsByUserId(userId: string) {
   const res = await axios.get(`${server}/api/posts/users/${userId}`);
   const result: PostType[] = await res.data;
   return result;
@@ -103,13 +103,13 @@ export async function createPost(postObject: PostType) {
   return result;
 }
 
-export async function updatePostById(postId: String, postObject: PostType) {
+export async function updatePostById(postId: string, postObject: PostType) {
   const res = await axios.put(`${server}/api/posts/${postId}`, postObject);
   const result: PostType = await res.data;
   return result;
 }
 
-export async function deletePostById(postId: String) {
+export async function deletePostById(postId: string) {
   const res = await axios.delete(`${server}/api/posts/${postId}`);
   const result: PostType = await res.data;
   return result;
@@ -123,48 +123,51 @@ export async function getComments() {
   return result;
 }
 
-export async function getCommentById(postId: String) {
-  const res = await axios.get(`${server}/api/comments/${postId}`);
+export async function getCommentById(commentId: string) {
+  const res = await axios.get(`${server}/api/comments/${commentId}`);
   const result: CommentType = await res.data;
   return result;
 }
 
-export async function getCommentsByUserId(userId: String) {
+export async function getCommentsByUserId(userId: string) {
   const res = await axios.get(`${server}/api/comments/users/${userId}`);
   const result: CommentType[] = await res.data;
   return result;
 }
 
-export async function getParentCommentsByPostId(postId: String) {
+export async function getParentCommentsByPostId(postId: string) {
   const res = await axios.get(`${server}/api/comments/posts/${postId}`);
   const result: CommentType[] = await res.data;
   return result;
 }
 
-export async function getChildCommentsByParentId(parentCommentId: String) {
+export async function getChildCommentsByParentId(parentCommentId: string) {
   const res = await axios.get(
     `${server}/api/comments/children/${parentCommentId}`
   );
   const result: CommentType[] = await res.data;
   return result;
 }
-export async function createComment(postObject: CommentType) {
-  const res = await axios.post(`${server}/api/comments`, postObject);
+export async function createComment(commentObject: CommentType) {
+  const res = await axios.post(`${server}/api/comments`, commentObject);
   const result: CommentType = await res.data;
   return result;
 }
 
 export async function updateCommentById(
-  postId: String,
-  postObject: CommentType
+  commentId: string,
+  commentObject: CommentType
 ) {
-  const res = await axios.put(`${server}/api/comments/${postId}`, postObject);
+  const res = await axios.put(
+    `${server}/api/comments/${commentId}`,
+    commentObject
+  );
   const result: CommentType = await res.data;
   return result;
 }
 
-export async function deleteCommentById(postId: String) {
-  const res = await axios.delete(`${server}/api/comments/${postId}`);
+export async function deleteCommentById(commentId: string) {
+  const res = await axios.delete(`${server}/api/comments/${commentId}`);
   const result: CommentType = await res.data;
   return result;
 }
