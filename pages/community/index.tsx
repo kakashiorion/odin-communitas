@@ -7,17 +7,15 @@ import NewCommunityButton from "../../components/buttons/NewCommunityButton";
 import { CommunityType } from "../../util/types";
 import { useContext, useEffect, useState } from "react";
 import {
-  getCommunities,
   getCommunityById,
 } from "../../util/ServerCalls";
 import { UserContext } from "../_app";
 import Community from "../../models/Community";
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   return {
     props: {
-      // comms: await getCommunities(),
-      comms: await Community.find(),
+      comms: JSON.parse(JSON.stringify(await Community.find())),
     },
   };
 }

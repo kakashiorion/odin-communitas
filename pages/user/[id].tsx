@@ -7,30 +7,15 @@ import defaultProfileImage from "../../public/defaultProfilePic.webp";
 import {
   getCommentsByUserId,
   getPostsByUserId,
-  getUserById,
-  getUsers,
 } from "../../util/ServerCalls";
 import { PostType, UserType, CommentType } from "../../util/types";
 import moment from "moment";
 import User from "../../models/User";
 
-export async function getStaticPaths() {
-  // const results: UserType[] = await getUsers();
-  const results: UserType[] = await User.find();
-
-  return {
-    paths: results.map((user) => {
-      return { params: { id: String(user._id) } };
-    }),
-    fallback: true,
-  };
-}
-
-export async function getStaticProps({ params }: { params: { id: string } }) {
+export async function getServerSideProps({ params }: { params: { id: string } }) {
   return {
     props: {
-      // user: await getUserById(params.id),
-      user: await User.findById(params.id),
+      user: JSON.parse(JSON.stringify(await User.findById(params.id))),
     },
   };
 }

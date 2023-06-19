@@ -8,33 +8,17 @@ import commImage from "../../public/commDefault.jpeg";
 import { CommunityType, PostType } from "../../util/types";
 import { useContext, useEffect, useState } from "react";
 import {
-  getCommunities,
   getCommunityById,
-  getPostsByCommunityId,
 } from "../../util/ServerCalls";
 import { UserContext } from "../_app";
 import Post from "../../models/Post";
 import Community from "../../models/Community";
 
-export async function getStaticPaths() {
-  // const results: CommunityType[] = await getCommunities();
-  const results: CommunityType[] = await Community.find();
-
-  return {
-    paths: results.map((comm) => {
-      return { params: { id: String(comm._id) } };
-    }),
-    fallback: true,
-  };
-}
-
-export async function getStaticProps({ params }: { params: { id: string } }) {
+export async function getServerSideProps({ params }: { params: { id: string } }) {
   return {
     props: {
-      // community: await getCommunityById(params.id),
-      community: await Community.findById(params.id),
-      // posts: await getPostsByCommunityId(params.id),
-      posts: await Post.find({ communityId: params.id }),
+      community: JSON.parse(JSON.stringify(await Community.findById(params.id))),
+      posts: JSON.parse(JSON.stringify(await Post.find({ communityId: params.id }))),
     },
   };
 }

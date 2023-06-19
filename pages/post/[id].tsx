@@ -5,29 +5,14 @@ import PostCard from "../../components/cards/PostCard";
 import Header from "../../components/Header";
 import {
   getParentCommentsByPostId,
-  getPostById,
-  getPosts,
 } from "../../util/ServerCalls";
 import { PostType, CommentType } from "../../util/types";
 import Post from "../../models/Post";
 
-export async function getStaticPaths() {
-  // const results: PostType[] = await getPosts();
-  const results: PostType[] = await Post.find();
-
-  return {
-    paths: results.map((post) => {
-      return { params: { id: String(post._id) } };
-    }),
-    fallback: true,
-  };
-}
-
-export async function getStaticProps({ params }: { params: { id: string } }) {
+export async function getServerSideProps({ params }: { params: { id: string } }) {
   return {
     props: {
-      // post: await getPostById(params.id),
-      post: await Post.findById(params.id),
+      post: JSON.parse(JSON.stringify(await Post.findById(params.id))),
     },
   };
 }
