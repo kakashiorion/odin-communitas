@@ -9,11 +9,11 @@ export default function NewPostButton() {
 
   return (
     <button
-      className="flex rounded-md shadow-md whitespace-nowrap text-white bg-indigo-600 hover:bg-indigo-800 py-2 px-3 h-10 items-center gap-2"
+      className="flex rounded-full shadow-md whitespace-nowrap text-white bg-blue-600 hover:bg-blue-800 py-3 px-3 lg:px-4 items-center gap-2"
       onClick={() => createNewPost()}
     >
       <CreateIcon />
-      <p className="hidden md:inline">Create post</p>
+      <p className="hidden md:text-sm md:inline">CREATE POST</p>
     </button>
   );
 }

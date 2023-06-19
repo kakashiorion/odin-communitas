@@ -6,14 +6,13 @@ import Header from "../../components/Header";
 import { BackIcon } from "../../components/icons/Icons";
 import commImage from "../../public/commDefault.jpeg";
 import { CommunityType, PostType } from "../../util/types";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   getCommunities,
   getCommunityById,
   getPostsByCommunityId,
-  getUserById,
 } from "../../util/ServerCalls";
-import { getCookie } from "cookies-next";
+import { UserContext } from "../_app";
 
 export async function getStaticPaths() {
   const results: CommunityType[] = await getCommunities();
@@ -55,7 +54,7 @@ export default function CommunityPage(props: CommunityPageProps) {
 function AllCommunitiesBackLink() {
   return (
     <Link href={"/community/"} passHref>
-      <div className="flex gap-2 items-center text-indigo-600">
+      <div className="flex gap-2 items-center text-blue-600">
         <BackIcon />
         <p className="font-bold text-sm">View All Communities</p>
       </div>
@@ -69,48 +68,44 @@ interface CommunityDataProps {
 function CommunityData(props: CommunityDataProps) {
   const [commMemberCount, setCommMemberCount] = useState(0);
   const [joinStatus, setJoinStatus] = useState(false);
-  const loggedInUser = getCookie("user");
+  const loggedInUser = useContext(UserContext);
+
   useEffect(() => {
     const fetchData = async () => {
       const community: CommunityType = await getCommunityById(props.comm._id);
-      let cUser;
-      if (loggedInUser) {
-        cUser = await getUserById(loggedInUser.toString());
-      }
-      return { community, cUser };
+      return { community };
     };
     fetchData().then((data) => {
       setCommMemberCount(data.community.members.length);
-      if (data.cUser) {
-        setJoinStatus(data.cUser.communities.includes(props.comm._id));
+      if (loggedInUser) {
+        setJoinStatus(loggedInUser.communities.includes(props.comm._id));
       }
     });
-  });
+  },[loggedInUser, props.comm._id]);
+
   return (
-    <div className="p-2 w-full md:w-[768px]">
-      <div className="bg-gradient-to-r from-indigo-400 p-4 border-2 border-white shadow-md rounded-2xl flex justify-between gap-4 items-start ">
-        <div className="flex justify-start gap-4 items-start">
-          <div className="h-16 w-16 relative flex-none">
-            <Image
-              className="rounded-3xl"
-              src={commImage}
-              alt="Random Image"
-              layout="responsive"
-              width="100%"
-              height="100%"
-            />
-          </div>
-          <div className="flex flex-col items-start justify-around ">
+    <div className="py-2 px-6 md:px-8 w-full md:w-[768px]">
+      <div className="bg-gradient-to-r from-blue-400 p-4 border-2 border-white shadow-md rounded flex justify-between gap-4 items-start ">
+        <div className="flex flex-col gap-2 items-start justify-around ">
+          <div className="flex justify-start gap-4 items-center">
+            <div className="h-16 w-16 relative flex-none">
+              <Image
+                className="rounded-full"
+                src={commImage}
+                alt="Random Image"
+                fill={true}
+              />
+            </div>
             <CommunityTitle commName={props.comm.name} />
-            <CommunityDescription commDesc={props.comm.description} />
           </div>
+          <CommunityDescription commDesc={props.comm.description} />
         </div>
         <div className="flex flex-col items-end justify-center gap-2">
           <JoinStatus
             commId={props.comm._id}
             joinStatus={joinStatus}
             setJoinStatus={setJoinStatus}
-          />
+            />
           <div className="text-xs md:text-sm w-full whitespace-nowrap">
             <p> {commMemberCount} members</p>
           </div>
@@ -179,7 +174,7 @@ function CommunityContent(props: CommunityContentProps) {
   const [sortAlgo, setSortAlgo] = useState("New"); //Sort content by 'New' by default
 
   return (
-    <div className="p-2 w-full md:w-[768px]">
+    <div className="p-2 px-6 md:px-8 w-full md:w-[768px]">
       <div className="p-1 flex flex-col justify-start gap-4 items-center ">
         <PostsSorter setSort={setSortAlgo} />
       </div>
@@ -198,9 +193,9 @@ function PostsSorter(props: PostsSorterProps) {
       <p className="font-semibold text-xs md:text-sm">All Posts</p>
       <div className="flex gap-2 items-center">
         <p className="text-xs md:text-sm">SORT BY:</p>
-        <div className="flex items-center text-xs md:text-sm rounded-3xl text-indigo-600 bg-white focus:border-0 border-[1px] border-indigo-600 p-2 ">
+        <div className="flex items-center text-xs md:text-sm rounded-full text-blue-600 bg-white focus:border-0 border-[1px] border-blue-600 py-2 px-3 ">
           <select
-            className={"outline-0 "}
+            className={"outline-0 bg-transparent"}
             id="posts-sort"
             onChange={(e) => props.setSort(e.target.value)}
           >

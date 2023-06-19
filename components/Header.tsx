@@ -7,49 +7,54 @@ import {
   LogoutIcon,
   ProfileIcon,
 } from "./icons/Icons";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import NewPostButton from "./buttons/NewPostButton";
 import SearchBar from "./SearchBar";
 import Link from "next/link";
 import Image from "next/image";
 import defaultProfileImage from "../public/defaultProfilePic.webp";
-import { getCookie, removeCookies } from "cookies-next";
-import { getUserById } from "../util/ServerCalls";
-import { UserType } from "../util/types";
+import { removeCookies } from "cookies-next";
+import LogoOrig from "../public/LogoOrig.svg"
+import { UserContext } from "../pages/_app";
 
 interface HeaderProps {
   type?: string;
 }
 export default function Header(props: HeaderProps) {
-  const loggedInUser = getCookie("user");
-  function getComponent() {
-    if (loggedInUser) {
-      return <UserInfo />;
+  const [comp, setComp] =useState(<BothActionButtons />)
+  const user = useContext(UserContext);
+  
+  useEffect(() =>{
+    if (user) {
+      setComp(<UserInfo />)
     } else if (props.type == "onlylogin") {
-      return <OnlyLoginButton />;
+      setComp(<OnlyLoginButton />)
     } else if (props.type == "onlysignup") {
-      return <OnlySignupButton />;
-    } else {
-      return <BothActionButtons />;
+      setComp(<OnlySignupButton />);
     }
-  }
+  },[user, props.type])
 
   return (
-    <div className="shadow-md w-full bg-white h-14 z-20 top-0 gap-4 sticky flex justify-between items-center py-2 px-4">
+    <div className="shadow-md w-full bg-white z-50 top-0 gap-4 md:gap-6 sticky flex justify-between items-center py-2 px-6 md:px-8">
       <SiteInfo />
       <SearchBar />
-      {getComponent()}
+      {comp}
     </div>
   );
 }
 
 function Logo() {
-  return <div className="h-10 w-10 bg-indigo-600 rounded-3xl"></div>;
+  return <div className="h-8 w-8">
+    <Image
+        src={LogoOrig}
+        alt="Logo Image"
+      />
+  </div>;
 }
 
 function SiteName() {
   return (
-    <p className="text-2xl p-1 font-semibold text-indigo-600 hidden md:inline hover:bg-gray-100">
+    <p className="text-xl font-semibold text-blue-600 hidden md:inline hover:bg-gray-100">
       Communitas
     </p>
   );
@@ -58,7 +63,7 @@ function SiteName() {
 function SiteInfo() {
   return (
     <Link href="/" passHref>
-      <div className="flex justify-between items-center gap-3">
+      <div className="flex justify-between items-center gap-2">
         <Logo />
         <SiteName />
       </div>
@@ -68,7 +73,7 @@ function SiteInfo() {
 
 function BothActionButtons() {
   return (
-    <div className="flex gap-4 items-center">
+    <div className="flex gap-2 items-center justify-end">
       <LoginButton />
       <SignupButton />
     </div>
@@ -78,8 +83,8 @@ function BothActionButtons() {
 function OnlyLoginButton() {
   const msg = "Already have an account?";
   return (
-    <div className="flex gap-4 items-center">
-      <p className="text-xs md:text-sm hidden sm:inline">{msg}</p>
+    <div className="flex gap-2 items-center justify-end">
+      <p className="text-sm hidden lg:inline">{msg}</p>
       <LoginButton />
     </div>
   );
@@ -88,8 +93,8 @@ function OnlyLoginButton() {
 function OnlySignupButton() {
   const msg = "Don't have an account?";
   return (
-    <div className="flex gap-4 items-center">
-      <p className="text-xs md:text-sm hidden sm:inline">{msg}</p>
+    <div className="flex gap-2 items-center justify-end">
+      <p className="text-sm hidden lg:inline">{msg}</p>
       <SignupButton />
     </div>
   );
@@ -97,39 +102,18 @@ function OnlySignupButton() {
 
 function UserInfo() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [user, setUser] = useState({} as UserType);
-
-  useEffect(() => {
-    async function fetchData() {
-      const cUser = await getUserById(getCookie("user")!.toString());
-      return { cUser };
-    }
-    fetchData().then((data) => {
-      if (data.cUser) {
-        setUser(data.cUser);
-      }
-    });
-  }, []);
-
-  const handleClick = (e: any) => {
-    e.preventDefault();
-    setIsExpanded(!isExpanded);
-  };
+  const user = useContext(UserContext)
 
   return (
     <div className="flex gap-3 items-center">
       <NewPostButton />
       <div className="flex gap-3 items-center">
-        <Avatar userImageUrl={user.profileImageUrl} />
-        <p className="text-sm md:text-base hidden md:inline">{user.username}</p>
-        <a className="text-indigo-600">
-          {isExpanded ? (
-            <CollapseIcon onClick={handleClick} />
-          ) : (
-            <ExpandIcon onClick={handleClick} />
-          )}
-        </a>
-        {isExpanded ? <UserDropDown userId={user._id} /> : <></>}
+        <Avatar userImageUrl={user?.profileImageUrl} />
+        {/* <p className="lg:text-base hidden lg:flex">{user.username}</p> */}
+        <div className="text-blue-600" onClick={()=>setIsExpanded(!isExpanded)}>
+          {isExpanded ?<CollapseIcon />:<ExpandIcon />}
+        </div>
+        {isExpanded ? <UserDropDown userId={user?._id} /> : <></>}
       </div>
     </div>
   );
@@ -140,20 +124,18 @@ interface AvatarProps {
 }
 function Avatar(props: AvatarProps) {
   return (
-    <div className="h-8 w-8 relative">
+    <div className="h-8 w-8 hidden sm:flex relative">
       <Image
         className="rounded-full"
         src={props.userImageUrl ?? defaultProfileImage}
         alt="Profile Image"
-        layout="responsive"
-        width="100%"
-        height="100%"
+        fill={true}
       />
     </div>
   );
 }
 
-function UserDropDown(props: { userId: string }) {
+function UserDropDown(props: { userId?: string }) {
   const router = useRouter();
   const logOut = () => {
     removeCookies("user");
@@ -165,7 +147,7 @@ function UserDropDown(props: { userId: string }) {
   };
 
   return (
-    <div className=" flex flex-col z-10 p-2 bg-white rounded shadow-lg fixed top-16 right-3 ">
+    <div className=" flex flex-col z-100 p-2 bg-white rounded shadow-lg fixed top-16 right-3 ">
       <UserDropDownOption
         optionName="Profile"
         icon={<ProfileIcon />}
@@ -189,7 +171,7 @@ interface UserDropDownOptionProps {
 function UserDropDownOption(props: UserDropDownOptionProps) {
   return (
     <>
-      <button className="flex items-center gap-2 p-2" onClick={props.onClick}>
+      <button className="flex hover:bg-blue-200 rounded items-center gap-2 p-2" onClick={props.onClick}>
         {props.icon}
         <p className="text-sm font-medium">{props.optionName}</p>
       </button>

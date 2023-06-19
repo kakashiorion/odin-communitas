@@ -50,7 +50,7 @@ interface ProfileSectionProps {
 }
 export function ProfileSection(props: ProfileSectionProps) {
   return (
-    <div className="flex flex-col p-2 w-full md:w-[768px]">
+    <div className="flex flex-col py-2 px-6 md:px-8 w-full md:w-[768px]">
       <SampleTopPlaceholder />
       <ProfileInfo user={props.user} />
     </div>
@@ -59,7 +59,7 @@ export function ProfileSection(props: ProfileSectionProps) {
 
 export function SampleTopPlaceholder() {
   return (
-    <div className="bg-indigo-600 shadow-md  h-16 md:h-20 w-full rounded-t-2xl"></div>
+    <div className="bg-blue-600 shadow-md h-16 md:h-20 w-full rounded-t-2xl"></div>
   );
 }
 
@@ -68,7 +68,7 @@ interface ProfileInfoProps {
 }
 export function ProfileInfo(props: ProfileInfoProps) {
   return (
-    <div className="bg-white shadow-md h-32 md:h-40 z-0 rounded-b-2xl w-full flex flex-col relative items-center ">
+    <div className="bg-white shadow-md h-36 md:h-44 z-0 rounded-b-2xl w-full flex flex-col relative items-center ">
       <ProfileData user={props.user} />
     </div>
   );
@@ -79,7 +79,7 @@ interface ProfileDataProps {
 }
 export function ProfileData(props: ProfileDataProps) {
   return (
-    <div className="absolute w-full top-[-48px] md:top-[-48px] flex flex-col items-center gap-2">
+    <div className="absolute w-full top-[-48px] flex flex-col items-center gap-2">
       <ProfileAvatar userImageUrl={props.user.profileImageUrl} />
       <ProfileName username={props.user.username} />
       <ProfileDetails user={props.user} />
@@ -97,9 +97,7 @@ export function ProfileAvatar(props: ProfileAvatarProps) {
         className="rounded-full"
         src={props.userImageUrl ?? defaultProfileImage}
         alt="Profile Image"
-        layout="responsive"
-        width="100%"
-        height="100%"
+        fill={true}
       />
     </div>
   );
@@ -117,7 +115,7 @@ interface ProfileDetailsProps {
 }
 export function ProfileDetails(props: ProfileDetailsProps) {
   return (
-    <div className="grid grid-cols-3 w-full p-2 md:p-3  gap-3">
+    <div className="grid grid-cols-3 w-full p-2 md:p-3 gap-3">
       <JoinInfo joinDate={props.user.createdAt} />
       <PostsInfo postCount={props.user.posts.length} />
       <CommentsInfo commentCount={props.user.comments.length} />
@@ -170,7 +168,7 @@ export function UserContent(props: UserContentProps) {
   const [browsing, setBrowsing] = useState("Posts");
 
   return (
-    <div className="flex flex-col p-2 w-full gap-3 md:w-[768px] items-center ">
+    <div className="flex flex-col py-2 px-6 md:px-8 w-full gap-3 md:w-[768px] items-center ">
       <ContentSelector browsing={browsing} setBrowsing={setBrowsing} />
       {browsing == "Posts" ? <PostsContent user={props.user} /> : null}
       {browsing == "Comments" ? <CommentsContent user={props.user} /> : null}
@@ -187,8 +185,8 @@ export function ContentSelector(props: ContentSelectorProps) {
     <div className="flex justify-around shadow-md p-2 w-full rounded-t-xl bg-white">
       <button
         className={
-          "hover:text-indigo-600 border-indigo-400 w-1/3" +
-          (props.browsing == "Posts" ? " border-b-4 " : "")
+          "hover:text-blue-600 border-b-4 w-1/3" +
+          (props.browsing == "Posts" ? " border-b-blue-600 " : " border-b-transparent ")
         }
         onClick={() => props.setBrowsing("Posts")}
       >
@@ -196,8 +194,8 @@ export function ContentSelector(props: ContentSelectorProps) {
       </button>
       <button
         className={
-          "hover:text-indigo-600 border-indigo-400 w-1/3" +
-          (props.browsing == "Comments" ? " border-b-4 " : "")
+          "hover:text-blue-600 border-b-4 w-1/3 " +
+          (props.browsing == "Comments" ? " border-b-blue-600 " : " border-b-transparent ")
         }
         onClick={() => props.setBrowsing("Comments")}
       >
@@ -214,15 +212,15 @@ export function PostsContent(props: PostsContentProps) {
   const emptyPosts: PostType[] = [];
   const [userPosts, setUserPosts] = useState(emptyPosts);
 
-  const fetchData = async () => {
-    const posts = await getPostsByUserId(props.user._id);
-    return { posts };
-  };
   useEffect(() => {
+    const fetchData = async () => {
+      const posts = await getPostsByUserId(props.user._id);
+      return { posts };
+    };
     fetchData().then((data) => {
       setUserPosts(data.posts);
     });
-  });
+  },[props.user._id]);
   return (
     <div className="flex flex-col rounded-b-xl gap-3 w-full justify-center">
       {userPosts.length > 0 ? (
@@ -247,15 +245,15 @@ interface CommentsContentProps {
 export function CommentsContent(props: CommentsContentProps) {
   const emptyComments: CommentType[] = [];
   const [userComments, setUserComments] = useState(emptyComments);
-  const fetchData = async () => {
-    const comments = await getCommentsByUserId(props.user._id);
-    return { comments };
-  };
   useEffect(() => {
+    const fetchData = async () => {
+      const comments = await getCommentsByUserId(props.user._id);
+      return { comments };
+    };
     fetchData().then((data) => {
       setUserComments(data.comments);
     });
-  });
+  },[props.user._id]);
   return (
     <div className="flex flex-col rounded-b-xl gap-3 w-full justify-center">
       {userComments.length > 0 ? (

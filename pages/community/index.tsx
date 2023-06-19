@@ -3,15 +3,14 @@ import Header from "../../components/Header";
 import Image from "next/image";
 import sampleCommImage from "../../public/commDefault.jpeg";
 import JoinButton from "../../components/buttons/JoinButton";
-import CreateCommunityButton from "../../components/buttons/NewCommunityButton";
-import { CommunityType, UserType } from "../../util/types";
-import { useEffect, useState } from "react";
+import NewCommunityButton from "../../components/buttons/NewCommunityButton";
+import { CommunityType } from "../../util/types";
+import { useContext, useEffect, useState } from "react";
 import {
   getCommunities,
   getCommunityById,
-  getUserById,
 } from "../../util/ServerCalls";
-import { getCookie } from "cookies-next";
+import { UserContext } from "../_app";
 
 export async function getStaticProps() {
   return {
@@ -60,7 +59,7 @@ export default function AllCommunityPage(props: AllCommunityPageProps) {
             commDesc={comm.description}
           />
         ))}
-        <CreateCommunityButton />
+        <NewCommunityButton />
       </div>
     </div>
   );
@@ -74,6 +73,8 @@ interface CommunityItemProps {
 }
 function CommunityItem(props: CommunityItemProps) {
   const [joinStatus, setJoinStatus] = useState(false);
+  const loggedInUser = useContext(UserContext);
+
   function getImageURL() {
     if (!props.commImageUrl || props.commImageUrl == "") {
       return sampleCommImage;
@@ -85,29 +86,26 @@ function CommunityItem(props: CommunityItemProps) {
   useEffect(() => {
     const fetchData = async () => {
       const community: CommunityType = await getCommunityById(props.commId);
-      const cUser = await getUserById(getCookie("user")!.toString());
-      return { community, cUser };
+      return { community };
     };
     fetchData().then((data) => {
       setCommMemberCount(data.community.members.length);
-      if (data.cUser) {
-        setJoinStatus(data.cUser.communities.includes(props.commId));
+      if (loggedInUser) {
+        setJoinStatus(loggedInUser.communities.includes(props.commId));
       }
     });
-  });
+  },[loggedInUser, props.commId]);
 
   return (
-    <div className="p-3 shadow-md bg-white hover:bg-gray-100 border-[1px] hover:border-indigo-600 flex rounded-lg w-full items-center justify-between">
+    <div className="p-3 shadow-md bg-white hover:bg-gray-100 border-[1px] hover:border-blue-600 flex rounded-full w-full items-center justify-between">
       <Link href={"/community/" + props.commId} passHref>
         <div className="flex gap-2 items-center">
           <div className="h-8 w-8 relative">
             <Image
-              className="rounded-xl"
+              className="rounded-full"
               src={getImageURL()}
               alt="Comm Image"
-              layout="responsive"
-              width="100%"
-              height="100%"
+              fill={true}
             ></Image>
           </div>
           <p className="hover:underline">{props.commName}</p>
@@ -137,9 +135,9 @@ function CommunitiesSorter(props: CommunitiesSorterProps) {
       <p className="font-semibold text-sm">All Communities</p>
       <div className="flex gap-2 items-center">
         <p className="text-sm">SORT BY:</p>
-        <div className="flex items-center text-xs md:text-sm rounded-3xl text-indigo-600 bg-white focus:border-0 border-[1px] border-indigo-600 p-2 ">
+        <div className="flex items-center text-xs md:text-sm rounded-full text-blue-600 bg-white focus:border-0 border-[1px] border-blue-600 py-2 px-3 ">
           <select
-            className={"outline-0 "}
+            className={"outline-0 bg-transparent"}
             id="communities-sort"
             onChange={(e) => props.setSort(e.target.value)}
           >

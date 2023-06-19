@@ -47,17 +47,17 @@ interface PostColumnProps {
 function PostColumn(props: PostColumnProps) {
   const emptyParentComments: CommentType[] = [];
   const [parentComments, setParentComments] = useState(emptyParentComments);
-  const fetchData = async () => {
-    const comments = await getParentCommentsByPostId(props.post._id);
-    return { comments };
-  };
   useEffect(() => {
+    const fetchData = async () => {
+      const comments = await getParentCommentsByPostId(props.post._id);
+      return { comments };
+    };
     fetchData().then((data) => {
       setParentComments(data.comments);
     });
-  });
+  },[props.post._id]);
   return (
-    <div className="flex flex-col gap-3 w-full md:w-[768px] p-3 ">
+    <div className="flex flex-col gap-3 w-full md:w-[768px] py-3 px-6 md:px-8 ">
       <PostCard showWithDesc={true} post={props.post} />
       <AddParentComment postId={props.post._id} />
       <hr />
@@ -78,7 +78,7 @@ function AddParentComment(props: AddParentComentProps) {
         placeholder="Share your thoughts!"
         value={commentText}
         onChange={(e) => setCommentText(e.target.value)}
-        className="w-full bg-gray-100 p-2 text-sm md:text-base outline-indigo-600"
+        className="w-full bg-gray-100 p-2 text-sm md:text-base outline-blue-600"
       ></textarea>
       <div className="w-full flex justify-end">
         <AddCommentButton
@@ -115,9 +115,9 @@ function CommentsSorter(props: CommentsSorterProps) {
       <p className="font-semibold text-xs md:text-sm">All Comments</p>
       <div className="flex gap-2 items-center">
         <p className="text-xs md:text-sm">SORT BY:</p>
-        <div className="flex items-center text-xs md:text-sm rounded-3xl text-indigo-600 bg-white focus:border-0 border-[1px] border-indigo-600 p-2 ">
+        <div className="flex items-center text-xs md:text-sm rounded-full text-blue-600 bg-white focus:border-0 border-[1px] border-blue-600 py-2 px-3 ">
           <select
-            className={"outline-0 "}
+            className={"outline-0 bg-transparent"}
             id="comments-sort"
             onChange={(e) => props.setSort(e.target.value)}
           >

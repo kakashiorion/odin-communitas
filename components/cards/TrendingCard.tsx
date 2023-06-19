@@ -8,17 +8,20 @@ interface TrendingCardProps {
 }
 export default function TrendingCard(props: TrendingCardProps) {
   return (
-    <Link href={"/post/" + props.post._id} passHref>
-      <div
-        className={
-          "h-40 w-full rounded text-white flex flex-col shadow-md items-start justify-end p-2 md:p-3 " +
-          `bg-gradient-to-r from-indigo-300 to-indigo-400`
+    <Link href={"/post/" + props.post._id} passHref className="w-1/2 md:w-1/3 shrink-0">
+        <div className={
+          `h-40 w-full gap-2 overflow-hidden rounded text-white flex flex-col shadow-md items-start justify-end p-3 md:p-4 bg-white/20`
         }
-      >
-        <TrendHeadline title={props.post.title} />
-        <TrendContent content={props.post.description} />
-        <TrendCommunity commId={props.post.communityId} />
-      </div>
+        style={{
+          backgroundImage: `url(${props.post.attachmentLink})`,
+          backgroundSize: 'cover',
+          backgroundBlendMode:'soft-light',
+        }}
+        > 
+          <TrendHeadline title={props.post.title} />
+          <TrendContent content={props.post.description} />
+          <TrendCommunity commId={props.post.communityId} />
+        </div>
     </Link>
   );
 }
@@ -28,7 +31,7 @@ interface TrendHeadlineProps {
 }
 function TrendHeadline(props: TrendHeadlineProps) {
   return (
-    <p className="text-sm md:text-base w-full font-medium truncate">
+    <p className="text-base md:text-lg w-full font-bold line-clamp-2">
       {props.title}
     </p>
   );
@@ -38,7 +41,7 @@ interface TrendContentProps {
   content: string;
 }
 function TrendContent(props: TrendContentProps) {
-  return <p className="text-xs md:text-sm w-full truncate">{props.content}</p>;
+  return <p className="text-sm md:text-base w-full font-medium line-clamp-2">{props.content}</p>;
 }
 
 interface TrendCommunityProps {
@@ -46,15 +49,15 @@ interface TrendCommunityProps {
 }
 function TrendCommunity(props: TrendCommunityProps) {
   const [postCommunityName, setPostCommunityName] = useState("");
-  const fetchData = async () => {
-    const cName = (await getCommunityById(props.commId)).name;
-    return { cName };
-  };
   useEffect(() => {
+    const fetchData = async () => {
+      const cName = (await getCommunityById(props.commId)).name;
+      return { cName };
+    };
     fetchData().then((data) => {
       setPostCommunityName(data.cName);
     });
-  });
+  },[props.commId]);
   return (
     <p className="text-[10px] md:text-xs w-full font-medium">
       c/{postCommunityName}

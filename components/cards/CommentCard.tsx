@@ -11,18 +11,18 @@ import {
   UpvotedIcon,
   DownvotedIcon,
 } from "../icons/Icons";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import CommentButton from "../buttons/AddCommentButton";
 import moment from "moment";
-import { CommentType, UserType } from "../../util/types";
+import { CommentType } from "../../util/types";
 import {
   getChildCommentsByParentId,
   getUserById,
   updateCommentById,
   updateUserById,
 } from "../../util/ServerCalls";
-import { getCookie } from "cookies-next";
 import router from "next/router";
+import { UserContext } from "../../pages/_app";
 
 interface CommentCardProps {
   comment: CommentType;
@@ -31,19 +31,27 @@ export default function CommentCard(props: CommentCardProps) {
   const [showThread, setShowThread] = useState(false);
   const emptyChildComments: CommentType[] = [];
   const [childComments, setChildComments] = useState(emptyChildComments);
+  const [username, setUsername] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       const comments = await getChildCommentsByParentId(props.comment._id);
-      return { comments };
+      const userfromDB = await getUserById(props.comment.posterId);
+      return { comments, userfromDB };
     };
     fetchData().then((data) => {
       setChildComments(data.comments);
+      setUsername(data.userfromDB.username);
+      if (data.userfromDB.profileImageUrl) {
+        setImageUrl(data.userfromDB.profileImageUrl);
+      }
     });
-  }, [props.comment._id]);
+  }, [props.comment._id, props.comment.posterId]);
+  
   return (
     <div className="w-full bg-white border-[1px] rounded shadow-md flex flex-col p-2 gap-1 items-start">
-      <CommentHeader comment={props.comment} />
+      <CommentHeader comment={props.comment} imageUrl={imageUrl} username={username}/>
       <CommentContent commentContent={props.comment.content} />
       <CommentActions
         setShowThread={setShowThread}
@@ -66,59 +74,39 @@ export default function CommentCard(props: CommentCardProps) {
 
 interface CommentHeaderProps {
   comment: CommentType;
+  username: string;
+  imageUrl: string;
 }
 function CommentHeader(props: CommentHeaderProps) {
   return (
     <div className="w-full p-1 flex items-center gap-3 justify-start">
-      <CommentUser userId={props.comment.posterId} />
-      <CommentTime commentTime={props.comment.createdAt} />
+      <CommentUser userId={props.comment.posterId} imageUrl={props.imageUrl} username={props.username} />
+      <div className="h-1 w-1 rounded bg-slate-600"></div>
+      <p className="text-[10px] md:text-xs whitespace-nowrap">
+        {moment(props.comment.createdAt).fromNow()}
+      </p>    
     </div>
   );
 }
 
-interface CommentTimeProps {
-  commentTime: Date;
-}
-function CommentTime(props: CommentTimeProps) {
-  return (
-    <p className="text-[10px] md:text-xs whitespace-nowrap">
-      {moment(props.commentTime).fromNow()}
-    </p>
-  );
-}
 interface CommentUserProps {
   userId: string;
+  username: string;
+  imageUrl: string;
 }
 function CommentUser(props: CommentUserProps) {
-  const [username, setUsername] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const userfromDB = await getUserById(props.userId);
-      return { userfromDB };
-    };
-    fetchData().then((data) => {
-      setUsername(data.userfromDB.username);
-      if (data.userfromDB.profileImageUrl) {
-        setImageUrl(data.userfromDB.profileImageUrl);
-      }
-    });
-  }, [props.userId]);
   return (
     <Link href={"/user/" + props.userId} passHref>
       <div className="flex items-center gap-2 ">
         <div className="h-6 w-6 relative">
           <Image
-            className="rounded-lg"
-            src={imageUrl == "" ? defaultImage : imageUrl}
+            className="rounded-full"
+            src={props.imageUrl == "" ? defaultImage : props.imageUrl}
             alt="Default Profile Image"
-            layout="responsive"
-            width="100%"
-            height="100%"
+           fill={true}
           />
         </div>
-        <p className="text-xs md:text-sm hover:underline">{username}</p>
+        <p className="text-xs md:text-sm hover:underline">{props.username}</p>
       </div>
     </Link>
   );
@@ -143,13 +131,13 @@ interface CommentActionsProps {
 }
 function CommentActions(props: CommentActionsProps) {
   return (
-    <div className="w-full text-[10px] md:text-xs flex items-center gap-1 md:gap-2 justify-start ">
+    <div className="w-full text-xs md:text-sm flex items-center gap-1 md:gap-2 justify-between ">
       <CommentUpvotes comment={props.comment} />
-      <CommentReplies
+      {!props.comment.parentCommentId && <CommentReplies
         setShowThread={props.setShowThread}
         showThread={props.showThread}
         commentCount={props.childCommentCount}
-      />
+      />}
       <CommentShare />
       <CommentSave commentId={props.comment._id} />
     </div>
@@ -160,48 +148,38 @@ interface CommentUpvotesProps {
   comment: CommentType;
 }
 function CommentUpvotes(props: CommentUpvotesProps) {
+  const loggedInUser = useContext(UserContext);
   const [upvoted, setUpvoted] = useState(false);
   const [downvoted, setDownvoted] = useState(false);
+  
   useEffect(() => {
-    const loggedInUser = getCookie("user");
-    const fetchData = async () => {
-      let cUser;
-      if (loggedInUser) {
-        cUser = await getUserById(loggedInUser.toString());
-      }
-      return { cUser };
-    };
-    fetchData().then((data) => {
-      if (data.cUser && props.comment.upvotersId.includes(data.cUser._id)) {
+      if (loggedInUser && props.comment.upvotersId.includes(loggedInUser._id)) {
         setUpvoted(true);
       } else if (
-        data.cUser &&
-        props.comment.downvotersId.includes(data.cUser._id)
+        loggedInUser &&
+        props.comment.downvotersId.includes(loggedInUser._id)
       ) {
         setDownvoted(true);
       }
-    });
-  }, []);
+  }, [loggedInUser, props.comment.downvotersId, props.comment.upvotersId]);
 
   async function upvoteComment() {
-    const loggedInUser = getCookie("user");
     if (!loggedInUser) {
       router.push("/login");
     } else {
-      let cUser: UserType = await getUserById(loggedInUser.toString());
       if (upvoted) {
         setUpvoted(false);
         let removedList = props.comment.upvotersId.filter(
-          (u: string) => u != cUser._id
+          (u: string) => u != loggedInUser._id
         );
         props.comment.upvotersId = removedList;
         await updateCommentById(props.comment._id, props.comment);
       } else {
         setUpvoted(true);
         setDownvoted(false);
-        props.comment.upvotersId.push(cUser._id);
+        props.comment.upvotersId.push(loggedInUser._id);
         let removedList = props.comment.downvotersId.filter(
-          (u: string) => u != cUser._id
+          (u: string) => u != loggedInUser._id
         );
         props.comment.downvotersId = removedList;
         await updateCommentById(props.comment._id, props.comment);
@@ -210,24 +188,22 @@ function CommentUpvotes(props: CommentUpvotesProps) {
   }
 
   async function downvoteComment() {
-    const loggedInUser = getCookie("user");
     if (!loggedInUser) {
       router.push("/login");
     } else {
-      let cUser: UserType = await getUserById(loggedInUser.toString());
       if (downvoted) {
         setDownvoted(false);
         let removedList = props.comment.downvotersId.filter(
-          (u: string) => u != cUser._id
+          (u: string) => u != loggedInUser._id
         );
         props.comment.downvotersId = removedList;
         await updateCommentById(props.comment._id, props.comment);
       } else {
         setUpvoted(false);
         setDownvoted(true);
-        props.comment.downvotersId.push(cUser._id);
+        props.comment.downvotersId.push(loggedInUser._id);
         let removedList = props.comment.upvotersId.filter(
-          (u: string) => u != cUser._id
+          (u: string) => u != loggedInUser._id
         );
         props.comment.upvotersId = removedList;
         await updateCommentById(props.comment._id, props.comment);
@@ -236,11 +212,11 @@ function CommentUpvotes(props: CommentUpvotesProps) {
   }
 
   return (
-    <div className="flex gap-2 p-2 justify-start items-center ">
+    <div className="flex gap-2 md:gap-3 p-2 justify-start items-center ">
       <div onClick={() => upvoteComment()}>
         {upvoted ? <UpvotedIcon /> : <UpIcon />}
       </div>{" "}
-      <p className="">
+      <p className="text-sm md:text-base">
         {props.comment.upvotersId.length - props.comment.downvotersId.length}
       </p>
       <div onClick={() => downvoteComment()}>
@@ -259,7 +235,7 @@ function CommentReplies(props: CommentRepliesProps) {
   return (
     <button
       onClick={() => props.setShowThread(!props.showThread)}
-      className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-indigo-600"
+      className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-blue-600"
     >
       <CommentIcon />
       <p className="">{props.commentCount} Replies</p>
@@ -269,7 +245,7 @@ function CommentReplies(props: CommentRepliesProps) {
 
 function CommentShare() {
   return (
-    <div className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-indigo-600">
+    <div className="flex gap-2 cursor-pointer items-center hover:bg-gray-50 p-2 hover:text-blue-600">
       <ShareIcon />
       <p className="">Share</p>
     </div>
@@ -277,50 +253,40 @@ function CommentShare() {
 }
 
 function CommentSave(props: { commentId: string }) {
+  const loggedInUser = useContext(UserContext);
   const [saved, setSaved] = useState(false);
-  let loggedInUser = getCookie("user");
-  const fetchData = async () => {
-    let cUser;
-    if (loggedInUser) {
-      cUser = await getUserById(loggedInUser.toString());
-    }
-    return { cUser };
-  };
+  
   useEffect(() => {
-    fetchData().then((data) => {
-      if (data.cUser && data.cUser.savedCommentsId.includes(props.commentId)) {
+      if (loggedInUser && loggedInUser.savedCommentsId.includes(props.commentId)) {
         setSaved(true);
       }
-    });
-  }, []);
+  }, [loggedInUser, props.commentId]);
 
   async function saveComment() {
-    const loggedInUser = getCookie("user");
     if (!loggedInUser) {
       router.push("/login");
     } else {
-      let cUser: UserType = await getUserById(loggedInUser.toString());
       if (saved) {
         setSaved(false);
-        let removedList = cUser.savedCommentsId.filter(
+        let removedList = loggedInUser.savedCommentsId.filter(
           (p: string) => p != props.commentId
         );
-        cUser.savedCommentsId = removedList;
-        await updateUserById(cUser._id, cUser);
+        loggedInUser.savedCommentsId = removedList;
+        await updateUserById(loggedInUser._id, loggedInUser);
       } else {
         setSaved(true);
-        cUser.savedCommentsId.push(props.commentId);
-        await updateUserById(cUser._id, cUser);
+        loggedInUser.savedCommentsId.push(props.commentId);
+        await updateUserById(loggedInUser._id, loggedInUser);
       }
     }
   }
   return (
     <div
-      className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-indigo-600"
+      className="flex gap-2 items-center cursor-pointer hover:bg-gray-50 p-2 hover:text-blue-600"
       onClick={() => saveComment()}
     >
       {saved ? <SavedIcon /> : <SaveIcon />}
-      <p className={`text-xs md:text-sm ${saved ? "text-indigo-600" : ""}`}>
+      <p className={saved ? "text-blue-600" : ""}>
         {saved ? "Saved" : "Save"}
       </p>
     </div>
@@ -334,7 +300,7 @@ interface CommentThreadProps {
 }
 function CommentThread(props: CommentThreadProps) {
   return (
-    <div className="flex w-full justify-end border-l-2 border-indigo-600">
+    <div className="flex w-full justify-end border-l-2 border-blue-600">
       <div className="w-[95%] flex flex-col gap-2 items-center ">
         <AddReply postId={props.postId} commentId={props.commentId} />
         {props.childComments.map((c) => (
@@ -358,7 +324,7 @@ function AddReply(props: AddReplyProps) {
         placeholder="Reply to this comment!"
         onChange={(e) => setCommentText(e.target.value)}
         value={commentText}
-        className="w-full bg-gray-100 p-2 text-xs md:text-sm outline-indigo-600"
+        className="w-full bg-gray-100 p-2 text-xs md:text-sm outline-blue-600"
       />
       <CommentButton
         disabled={commentText == ""}

@@ -1,14 +1,12 @@
-import { GoogleIcon } from "../icons/Icons";
 import Image from "next/image";
 import signupImage from "../../public/loginImage.jpeg";
 import SignupActionButton from "../buttons/SignupActionButton";
-import { GithubLoginButton, GoogleLoginButton } from "../buttons/LoginButton";
 import { useState } from "react";
 
 export default function SignupCard() {
   return (
-    <div className="p-2 w-full lg:w-[1024px]">
-      <div className="flex shadow-md">
+    <div className="px-6 md:px-8 w-full h-full lg:w-[1024px]">
+      <div className="flex h-full shadow-md">
         <SignupImageSample />
         <SignupContent />
       </div>
@@ -24,7 +22,7 @@ function SignupContent() {
   const [passwordError, setPasswordError] = useState(false);
 
   return (
-    <div className="flex flex-col bg-white w-full md:w-2/3 p-6 md:p-8 gap-6 justify-between items-center ">
+    <div className="flex flex-col bg-white w-full h-full lg:w-1/2 p-6 md:p-8 gap-10 justify-center items-center ">
       <p className="text-xl md:text-2xl font-bold">Sign up to Communitas!</p>
       <EnterEmail setEmail={setEmail} />
       <EnterUsername
@@ -45,29 +43,16 @@ function SignupContent() {
         setUsernameError={setUsernameError}
         setPasswordError={setPasswordError}
       />
-      {/* <Seperator /> */}
-      {/* <GoogleLoginButton /> */}
-      {/* <GithubLoginButton /> */}
-    </div>
-  );
-}
-
-function Seperator() {
-  return (
-    <div className="flex gap-4 items-center">
-      <div className="w-20 h-[1px] bg-gray-400" />
-      <p className="text-gray-400 text-sm">OR</p>
-      <div className="w-20 h-[1px] bg-gray-400" />
     </div>
   );
 }
 
 function EnterEmail(props: { setEmail: (s: string) => void }) {
   return (
-    <div className=" w-4/5">
+    <div className="w-3/4 sm:w-1/2 lg:w-2/3">
       <input
         type="text"
-        className="flex text-sm md:text-base items-center rounded-sm focus:border-indigo-600 bg-stone-100 h-10 w-full px-2"
+        className="flex text-sm md:text-base items-center rounded-full focus:border-blue-600 bg-stone-100 w-full px-4 py-2"
         placeholder="Enter your email"
         id="email"
         onChange={(e) => props.setEmail(e.target.value)}
@@ -83,10 +68,10 @@ function EnterUsername(props: {
   username: string;
 }) {
   return (
-    <div className=" w-4/5">
+    <div className="w-3/4 sm:w-1/2 lg:w-2/3">
       <input
         type="text"
-        className="flex text-sm md:text-base items-center rounded-sm focus:border-indigo-600 bg-stone-100 h-10 w-full px-2"
+        className="flex text-sm md:text-base items-center rounded-full focus:border-blue-600 bg-stone-100 w-full px-4 py-2"
         placeholder="Choose username"
         id="username"
         value={props.username}
@@ -97,7 +82,7 @@ function EnterUsername(props: {
       />
       <p
         className={
-          `text-red-600 text-[10px] md:text-xs ` +
+          `text-red-600 text-[10px] p-1 md:text-xs ` +
           (props.usernameError ? "" : "hidden")
         }
       >
@@ -113,10 +98,10 @@ function EnterPassword(props: {
   passwordError: boolean;
 }) {
   return (
-    <div className="w-4/5">
+    <div className="w-3/4 sm:w-1/2 lg:w-2/3">
       <input
         type="password"
-        className="flex items-center rounded-sm focus:border-indigo-600 bg-stone-100 h-10 w-full px-2"
+        className="flex text-sm md:text-base items-center rounded-full focus:border-blue-600 bg-stone-100 w-full px-4 py-2"
         placeholder="Choose password (min. 8 characters)"
         onChange={(e) => {
           props.setPassword(e.target.value);
@@ -126,7 +111,7 @@ function EnterPassword(props: {
       />
       <p
         className={
-          `text-red-600 text-[10px] md:text-xs ` +
+          `text-red-600 text-[10px] p-1 md:text-xs ` +
           (props.passwordError ? "" : "hidden")
         }
       >
@@ -138,7 +123,7 @@ function EnterPassword(props: {
 
 function SignupImageSample() {
   return (
-    <div className="w-1/3 hidden md:flex">
+    <div className="lg:w-1/2 h-full hidden lg:flex">
       <Image src={signupImage} alt="Signup to Communitas" />
     </div>
   );

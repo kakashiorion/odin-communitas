@@ -13,6 +13,7 @@ import {
   faAngleDown,
   faBookmark as faSaved,
   faSearch,
+  faBolt
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faMessage,
@@ -25,14 +26,14 @@ export function UpIcon() {
   return (
     <FontAwesomeIcon
       icon={faAngleUp}
-      className="hover:text-indigo-600 h-5 md:h-6"
+      className="hover:text-blue-600 h-6 md:h-7"
     />
   );
 }
 
 export function UpvotedIcon() {
   return (
-    <FontAwesomeIcon icon={faAngleUp} className="text-indigo-600 h-5 md:h-6" />
+    <FontAwesomeIcon icon={faAngleUp} className="text-blue-600 h-6 md:h-7" />
   );
 }
 
@@ -40,7 +41,7 @@ export function DownIcon() {
   return (
     <FontAwesomeIcon
       icon={faAngleDown}
-      className="hover:text-indigo-600 h-5 md:h-6"
+      className="hover:text-blue-600 h-6 md:h-7"
     />
   );
 }
@@ -49,7 +50,7 @@ export function DownvotedIcon() {
   return (
     <FontAwesomeIcon
       icon={faAngleDown}
-      className="text-indigo-600 h-5 md:h-6"
+      className="text-blue-600 h-6 md:h-7"
     />
   );
 }
@@ -71,7 +72,7 @@ export function SaveIcon() {
 }
 
 export function SavedIcon() {
-  return <FontAwesomeIcon icon={faSaved} className="text-indigo-600" />;
+  return <FontAwesomeIcon icon={faSaved} className="text-blue-600" />;
 }
 
 interface IconProps {
@@ -119,4 +120,8 @@ export function SignupIcon() {
 
 export function BackIcon() {
   return <FontAwesomeIcon icon={faArrowLeft} />;
+}
+
+export function RisingIcon() {
+  return <FontAwesomeIcon icon={faBolt} />;
 }

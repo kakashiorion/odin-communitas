@@ -30,14 +30,14 @@ export default function SignupActionButton(props: SignupActionButtonProps) {
   }
   return (
     <button
-      className="h-10 flex items-center disabled:bg-gray-400 justify-center gap-3 w-1/2 bg-indigo-600 hover:bg-indigo-800 rounded-md px-3 text-white"
+      className="py-3 flex items-center shadow text-sm lg:text-base disabled:bg-gray-400 justify-center gap-3 w-1/2 bg-blue-600 hover:bg-blue-800 rounded-full px-4 text-white"
       onClick={() => createNewUser()}
       disabled={
         props.username == "" || props.password == "" || props.email == ""
       }
     >
       <SignupIcon />
-      <p>Signup</p>
+      <p>SIGNUP</p>
     </button>
   );
 }

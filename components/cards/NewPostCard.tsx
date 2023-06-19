@@ -28,11 +28,11 @@ export default function NewPostCard() {
   }, []);
 
   return (
-    <div className="p-2 w-full lg:w-[1024px] ">
-      <div className="flex shadow-md rounded-sm">
-        <div className="flex text-sm p-3 bg-white w-full md:text-base gap-3 flex-col justify-start items-start">
+    <div className="px-6 md:px-8 w-full lg:w-[1024px] ">
+      <div className="flex shadow-md rounded">
+        <div className="flex text-sm p-2 md:p-3 bg-white w-full md:w-2/3 md:text-base gap-3 flex-col justify-start items-start">
           <div className=" p-2 w-full">
-            <p className="font-semibold text-indigo-600 text-lg md:text-xl">
+            <p className="font-semibold text-blue-600 text-lg md:text-xl">
               Create a new post
             </p>
           </div>
@@ -52,7 +52,7 @@ export default function NewPostCard() {
             postCommunityId={postCommunityId}
           />
         </div>
-        <div className="w-80 hidden md:flex p-4 bg-white">
+        <div className="md:w-1/3 hidden md:flex p-4 bg-white">
           <Image src={newPostImage} alt="" />
         </div>
       </div>
@@ -67,12 +67,11 @@ function CommunitySelector(props: {
   return (
     <div className="flex p-2 gap-2 items-center">
       <p>Choose community:</p>
-      <div className="flex items-center rounded-md text-indigo-600 bg-gray-50 focus:border-0 border-[1px] border-indigo-600 p-2 ">
+      <div className="flex items-center rounded-full text-blue-600 bg-gray-50 focus:border-0 border-[1px] border-blue-600 py-2 px-3 ">
         <select
           className="outline-0 bg-gray-50"
           id="new-post-community"
           onChange={(e) => {
-            console.log(`selecting comm ${e.target.value}`);
             props.setPostCommunityId(e.target.value);
           }}
         >
@@ -93,7 +92,7 @@ function PostTitle(props: { setPostTitle: (s: string) => void }) {
       <input
         type="text"
         className={
-          "flex items-center rounded-md border-[1px]  border-indigo-400 outline-indigo-600 bg-gray-50 h-10 px-2 "
+          "flex items-center rounded border-[1px]  border-gray-400 outline-none focus:border-2 focus:border-blue-600 bg-gray-50 h-10 px-2 "
         }
         id="new-post-title"
         placeholder="Title"
@@ -109,7 +108,7 @@ function PostDescription(props: { setPostDesc: (s: string) => void }) {
       <textarea
         rows={5}
         className={
-          "flex items-center rounded-md border-[1px] border-indigo-400 outline-indigo-600 bg-gray-50 px-2 py-2 "
+          "flex items-center rounded border-[1px] border-gray-400 outline-none focus:border-2 focus:border-blue-600 bg-gray-50 px-2 py-2 "
         }
         id="new-post-desc"
         placeholder="Description"
@@ -125,7 +124,7 @@ function PostAttach(props: { setPostAttachLink: (s: string) => void }) {
       <input
         type="text"
         className={
-          "flex items-center rounded-md border-[1px] border-indigo-400 focus:border-indigo-600 bg-gray-50 h-10 px-2 "
+          "flex items-center rounded border-[1px] border-gray-400 outline-none focus:border-2 focus:border-blue-600 bg-gray-50 h-10 px-2 "
         }
         id="new-post-attach"
         placeholder="Attachment Link"
@@ -168,10 +167,10 @@ function Tag(props: TagProps) {
   return (
     <div
       className={
-        "px-2 py-1 rounded-3xl border-[1px] border-indigo-600 " +
+        "px-2 py-1 rounded-full border-[1px] border-blue-600 " +
         (selected
-          ? "bg-indigo-600 text-white hover:bg-indigo-500"
-          : "bg-white text-indigo-600 hover:bg-indigo-100 ")
+          ? "bg-blue-600 text-white hover:bg-blue-500"
+          : "bg-white text-blue-600 hover:bg-blue-100 ")
       }
       onClick={() => {
         if (selected) {
@@ -205,7 +204,7 @@ function PostActions(props: PostActionsProps) {
     tags: props.postTags!,
   });
   return (
-    <div className="p-2 flex gap-3">
+    <div className="p-2 w-full flex gap-3 items-center justify-between">
       <CreatePostButton newPostDetails={newPostDetails} />
       <CancelButton />
     </div>

@@ -14,18 +14,17 @@ export default function SearchBar() {
   }
 
   return (
-    <div className="flex items-center border-indigo-600 w-1/2">
+    <div className="flex items-center max-w-2xl flex-grow">
       <input
         type="text"
-        className="inputText rounded-l-xl bg-stone-100 h-10 w-full px-2 "
+        className="rounded-l-full focus:outline-none bg-stone-100 w-full px-4 py-2"
         placeholder="Search"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
         id="search-bar"
       />
-      {/* <input type="submit" hidden onSubmit={() => search(searchText)} /> */}
       <button
-        className="rounded-r-xl py-2 px-3 bg-indigo-600 text-white"
+        className="rounded-r-full py-2 px-4 disabled:bg-gray-400 bg-blue-600 hover:bg-blue-800 text-white"
         onClick={() => search(searchText)}
         disabled={searchText == ""}
       >

@@ -1,11 +1,11 @@
-import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 import {
   createCommunity,
-  getUserById,
   updateUserById,
 } from "../../util/ServerCalls";
-import { CommunityType, UserType } from "../../util/types";
+import { CommunityType } from "../../util/types";
+import { useContext } from "react";
+import { UserContext } from "../../pages/_app";
 
 interface StartCommunityButtonProps {
   commName: string;
@@ -15,6 +15,7 @@ interface StartCommunityButtonProps {
 }
 export default function StartCommunityButton(props: StartCommunityButtonProps) {
   const router = useRouter();
+  const loggedInUser = useContext(UserContext);
   const newComm = new Object({
     name: props.commName,
     description: props.commDesc,
@@ -24,22 +25,19 @@ export default function StartCommunityButton(props: StartCommunityButtonProps) {
 
   async function createComm(newCommObj: any) {
     //Get current user
-    const loggedInUser = getCookie("user");
     if (!loggedInUser) {
       router.push("/login");
     } else {
-      let currentUser: UserType = await getUserById(loggedInUser.toString());
-
       //Create new community
-      newCommObj.creatorId = currentUser._id;
-      newCommObj.members = [currentUser._id];
+      newCommObj.creatorId = loggedInUser._id;
+      newCommObj.members = [loggedInUser._id];
       const createdCommunity: CommunityType = await createCommunity(newCommObj);
 
       //update user's communities
-      let userCommList = currentUser.communities;
+      let userCommList = loggedInUser.communities;
       userCommList.push(createdCommunity._id);
-      currentUser.communities = userCommList;
-      await updateUserById(currentUser._id, currentUser);
+      loggedInUser.communities = userCommList;
+      await updateUserById(loggedInUser._id, loggedInUser);
 
       //redirect to the newly created community page
       router.push(`/community/${createdCommunity._id}`);
@@ -48,7 +46,7 @@ export default function StartCommunityButton(props: StartCommunityButtonProps) {
 
   return (
     <button
-      className="px-3 h-10 rounded-md bg-indigo-600 hover:bg-indigo-800 text-white text-xs md:text-sm "
+      className="px-4 py-3 rounded-full bg-blue-600 hover:bg-blue-800 text-white text-xs md:text-sm "
       onClick={() => createComm(newComm)}
     >
       START COMMUNITY

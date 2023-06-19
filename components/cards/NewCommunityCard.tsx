@@ -12,12 +12,12 @@ export default function NewCommunityCard() {
   const [commDesc, setCommDesc] = useState("");
   const [commAttach, setCommAttach] = useState("");
   return (
-    <div className="p-2 w-full lg:w-[1024px] ">
-      <div className="flex shadow-md rounded-sm">
-        <div className="flex text-sm p-3 bg-white w-full md:text-base gap-3 flex-col justify-start items-start">
+    <div className="px-6 md:px-8 w-full lg:w-[1024px] ">
+      <div className="flex shadow-md rounded">
+        <div className="flex text-sm p-2 md:p-3 bg-white w-full md:w-2/3 md:text-base gap-3 flex-col justify-start items-start">
           <CommunityHeader />
-          <CommunityName setCommName={setCommName} />
           <CategorySelector setCommCat={setCommCat} />
+          <CommunityName setCommName={setCommName} />
           <CommunityDescription setCommDesc={setCommDesc} />
           <CommunityAttach setCommAttach={setCommAttach} />
           <CommunityActions
@@ -27,7 +27,7 @@ export default function NewCommunityCard() {
             commAttach={commAttach}
           />
         </div>
-        <div className="w-80 hidden md:flex p-4 bg-white">
+        <div className="md:w-1/3 hidden md:flex p-4 bg-white">
           <Image src={newPostImage} alt="" />
         </div>
       </div>
@@ -38,7 +38,7 @@ export default function NewCommunityCard() {
 function CommunityHeader() {
   return (
     <div className=" p-2 w-full">
-      <p className="font-semibold text-indigo-600 text-lg md:text-xl">
+      <p className="font-semibold text-blue-600 text-lg md:text-xl">
         Create a new community
       </p>
     </div>
@@ -54,7 +54,7 @@ function CommunityName(props: CommunityNameProps) {
       <input
         type="text"
         className={
-          "flex items-center rounded-md border-[1px]  border-indigo-400 outline-indigo-600 bg-gray-50 h-10 px-2 "
+          "flex items-center rounded border-[1px]  border-gray-400 outline-none focus:border-2 focus:border-blue-600 bg-gray-50 h-10 px-2 "
         }
         id="new-post-title"
         placeholder="Name of the Community (max 60 characters)"
@@ -68,7 +68,7 @@ function CategorySelector(props: { setCommCat: (s: string) => void }) {
   return (
     <div className="flex p-2 gap-2 items-center">
       <p>Choose category:</p>
-      <div className="flex items-center rounded-md text-indigo-600 bg-gray-50 focus:border-0 border-[1px] border-indigo-600 p-2 ">
+      <div className="flex items-center rounded-full text-blue-600 bg-gray-50 focus:border-0 border-[1px] border-blue-600 p-2 ">
         <select
           className="outline-0 bg-gray-50"
           id="new-post-community"
@@ -89,7 +89,7 @@ function CommunityDescription(props: { setCommDesc: (s: string) => void }) {
       <textarea
         rows={5}
         className={
-          "flex items-center rounded-md border-[1px] border-indigo-400 outline-indigo-600 bg-gray-50 px-2 py-2 "
+          "flex items-center rounded border-[1px] border-gray-400 outline-none focus:border-2 focus:border-blue-600 bg-gray-50 px-2 py-2 "
         }
         id="new-post-desc"
         placeholder="What is this community about?"
@@ -105,7 +105,7 @@ function CommunityAttach(props: { setCommAttach: (s: string) => void }) {
       <input
         type="text"
         className={
-          "flex items-center rounded-md border-[1px] border-indigo-400 focus:border-indigo-600 bg-gray-50 h-10 px-2 "
+          "flex items-center rounded border-[1px] border-gray-400 outline-none focus:border-2 focus:border-blue-600 bg-gray-50 h-10 px-2 "
         }
         id="new-community-attach"
         placeholder="Community Image URL (Optional)"
@@ -123,7 +123,7 @@ interface CommunityActionsProps {
 }
 function CommunityActions(props: CommunityActionsProps) {
   return (
-    <div className="p-2 flex gap-3">
+    <div className="p-2 w-full flex gap-3 items-center justify-between">
       <StartCommunityButton
         commName={props.commName}
         commCat={props.commCat}

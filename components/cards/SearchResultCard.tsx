@@ -64,11 +64,11 @@ export default function SearchResultCard(props: {
   }, [searchTerm]);
 
   return (
-    <div className="flex flex-col items-center justify-start gap-3 w-full lg:w-[1024px]">
+    <div className="flex flex-col items-center justify-start gap-3 w-full px-6 md:px-8 lg:w-[1024px]">
       <p className="text-base md:text-lg font-bold">
         Searching for: {searchTerm}
       </p>
-      <div className="flex flex-col items-center justify-start p-2 gap-2 w-full">
+      <div className="flex flex-col items-center justify-start py-2 gap-2 w-full">
         <ContentSelector
           browsing={browsing}
           setBrowsing={setBrowsing}
@@ -156,8 +156,8 @@ export function ContentSelector(props: ContentSelectorProps) {
         <button
           key={s}
           className={
-            "hover:text-indigo-600 border-indigo-400 w-1/3" +
-            (props.browsing == s ? " border-b-4 " : "")
+            "hover:text-blue-600 border-b-4 w-1/3 " +
+            (props.browsing == s ?  " border-b-blue-600 " : " border-b-transparent ")
           }
           onClick={() => props.setBrowsing(s)}
         >

@@ -1,13 +1,13 @@
-import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 import {
   createComment,
   getPostById,
-  getUserById,
   updatePostById,
   updateUserById,
 } from "../../util/ServerCalls";
 import { CommentType, UserType } from "../../util/types";
+import { useContext } from "react";
+import { UserContext } from "../../pages/_app";
 
 interface CommentButtonProps {
   disabled: boolean;
@@ -19,42 +19,41 @@ interface CommentButtonProps {
 }
 export default function AddCommentButton(props: CommentButtonProps) {
   const router = useRouter();
+  const loggedInUser = useContext(UserContext);
   const newComment = new Object({
     content: props.content,
     postId: props.postId,
-    parentCommentId: props.parentCommentId!,
+    parentCommentId: props.parentCommentId??null,
   });
 
   async function createNewParentComment(newCommentObj: any) {
     //Get current user
-    const loggedInUser = getCookie("user");
     if (!loggedInUser) {
       router.push("/login");
     } else {
-      let currentUser: UserType = await getUserById(loggedInUser.toString());
-
       //Create new comment
-      newCommentObj.posterId = currentUser._id;
-      newCommentObj.upvotersId = [currentUser._id];
+      newCommentObj.posterId = loggedInUser._id;
+      newCommentObj.upvotersId = [loggedInUser._id];
       const createdComment: CommentType = await createComment(newCommentObj);
 
       //update user's comments
-      let userCommentsList = currentUser.comments;
+      let userCommentsList = loggedInUser.comments;
       userCommentsList.push(createdComment._id);
-      currentUser.comments = userCommentsList;
-      await updateUserById(currentUser._id, currentUser);
+      loggedInUser.comments = userCommentsList;
+      await updateUserById(loggedInUser._id, loggedInUser);
 
       //update post's comments
       let post = await getPostById(props.postId);
       post.commentsId.push(createdComment._id);
       await updatePostById(props.postId, post);
+      router.reload()
     }
   }
 
   return (
     <button
       disabled={props.disabled}
-      className="px-3 py-2 rounded-md bg-indigo-600 disabled:bg-indigo-300 hover:bg-indigo-800 text-white whitespace-nowrap text-xs md:text-sm "
+      className="px-3 py-2 rounded-full bg-blue-600 disabled:bg-blue-300 hover:bg-blue-800 text-white whitespace-nowrap text-xs md:text-sm "
       onClick={() => {
         props.setCommentText("");
         createNewParentComment(newComment);

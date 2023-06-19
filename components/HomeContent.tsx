@@ -5,8 +5,8 @@ import SideBar from "./Sidebar";
 
 export default function HomeContent(props: { posts: PostType[] }) {
   return (
-    <div className="flex flex-col gap-1 p-2 items-start w-full lg:w-[1024px]">
-      <div className="text-sm font-semibold">Popular Posts</div>
+    <div className="flex flex-col gap-2 py-2 px-6 md:px-8 items-start w-full lg:w-[1024px]">
+      <div className="text-xs md:text-sm text-gray-600 font-semibold">Your Feed</div>
       <div className="flex gap-4 items-start justify-between w-full">
         <PostsList posts={props.posts} />
         <SideBar />
@@ -33,7 +33,7 @@ function PostsList(props: { posts: PostType[] }) {
 
 function sortPopularPosts(pList: PostType[]) {
   const now = new Date();
-  const popularSortDays = 30;
+  const popularSortDays = 3000;
   const finalList = pList
     .filter(
       (p) => moment(now).diff(moment(p.createdAt), "days") < popularSortDays

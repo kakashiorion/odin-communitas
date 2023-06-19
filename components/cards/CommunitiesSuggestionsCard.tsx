@@ -57,7 +57,7 @@ export default function CommunitiesSuggestionsCard() {
   );
 
   return (
-    <div className="w-full rounded shadow-md p-2 bg-white">
+    <div className="w-full rounded shadow-md p-2 bg-white divide-y divide-gray-200">
       <CommunityExpandCard
         catName="POPULAR COMMUNITIES"
         key="PopularComm"
@@ -69,10 +69,8 @@ export default function CommunitiesSuggestionsCard() {
           } else setActiveCategory("");
         }}
       />
-      {Object.keys(catPopComms).map((e) => (
-        <>
-          <hr key={e + `hr`} />
-          <CommunityExpandCard
+      {Object.keys(catPopComms).map((e) => {
+        return <CommunityExpandCard
             key={e}
             comms={catPopComms[e]}
             catName={e}
@@ -83,8 +81,7 @@ export default function CommunitiesSuggestionsCard() {
               } else setActiveCategory("");
             }}
           />
-        </>
-      ))}
+        })}
     </div>
   );
 }
@@ -97,9 +94,9 @@ interface CommunityExpandCardProps {
 }
 function CommunityExpandCard(props: CommunityExpandCardProps) {
   return (
-    <>
+    <div className="flex flex-col">
       <div
-        className="flex items-center justify-between p-2 "
+        className="flex items-center justify-between p-3 "
         onClick={props.onClick}
       >
         <p className="text-sm font-medium">{props.catName}</p>
@@ -110,7 +107,7 @@ function CommunityExpandCard(props: CommunityExpandCardProps) {
         comms={props.comms}
         catName={props.catName}
       />
-    </>
+    </div>
   );
 }
 
@@ -123,7 +120,7 @@ function CommunityChips(props: CommunityChipsProps) {
   return (
     <div
       className={
-        "w-full p-2 flex flex-wrap gap-2 " + (props.isExpanded ? "" : "hidden")
+        "w-full px-1 pb-3 flex flex-wrap gap-2 " + (props.isExpanded ? "" : "hidden")
       }
     >
       {props.comms.map((c) => (
@@ -144,7 +141,7 @@ interface CommunityChipProps {
 function CommunityChip(props: CommunityChipProps) {
   return (
     <Link href={"/community/" + props.commId} passHref>
-      <p className="px-2 py-1 text-xs hover:text-indigo-600">
+      <p className="px-2 py-1 text-xs hover:text-blue-600">
         c/{props.commName}
       </p>
     </Link>

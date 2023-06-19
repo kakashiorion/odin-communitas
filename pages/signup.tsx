@@ -18,7 +18,7 @@ export async function getServerSideProps({ req, res }: { req: any; res: any }) {
 }
 export default function SignupPage() {
   return (
-    <div className="flex flex-col gap-4 items-center">
+    <div className="flex flex-col h-screen gap-4 pb-4 items-center">
       <Header type="onlylogin" />
       <SignupCard />
     </div>

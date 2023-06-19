@@ -18,10 +18,10 @@ import {
   updatePostById,
   updateUserById,
 } from "../../util/ServerCalls";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import moment from "moment";
-import { getCookie } from "cookies-next";
 import router from "next/router";
+import { UserContext } from "../../pages/_app";
 
 interface PostCardProps {
   hideCommunity?: boolean;
@@ -30,7 +30,7 @@ interface PostCardProps {
 }
 export default function PostCard(props: PostCardProps) {
   return (
-    <div className="w-full bg-white rounded shadow-md flex flex-col px-3 py-2 gap-1 items-start">
+    <div className="w-full bg-white rounded shadow-md flex flex-col p-3 md:p-4 gap-2 md:gap-3 items-start">
       <PostHeader
         hideCommunity={props.hideCommunity ?? false}
         post={props.post}
@@ -57,7 +57,7 @@ interface PostHeaderProps {
 
 function PostHeader(props: PostHeaderProps) {
   return (
-    <div className="w-full px-1 flex items-center gap-3 ">
+    <div className="w-full flex items-stretch gap-3 md:gap-4 ">
       <PostUpvotes post={props.post} />
       <PostInfo hideCommunity={props.hideCommunity} post={props.post} />
     </div>
@@ -67,42 +67,32 @@ function PostHeader(props: PostHeaderProps) {
 function PostUpvotes(props: { post: PostType }) {
   const [upvoted, setUpvoted] = useState(false);
   const [downvoted, setDownvoted] = useState(false);
-  const loggedInUser = getCookie("user");
-  const fetchData = async () => {
-    let cUser;
-    if (loggedInUser) {
-      cUser = await getUserById(loggedInUser.toString());
-    }
-    return { cUser };
-  };
+  const loggedInUser = useContext(UserContext);
+  
   useEffect(() => {
-    fetchData().then((data) => {
-      if (data.cUser && props.post.upvotersId.includes(data.cUser._id))
+      if (loggedInUser && props.post.upvotersId.includes(loggedInUser._id))
         setUpvoted(true);
-      else if (data.cUser && props.post.downvotersId.includes(data.cUser._id))
+      else if (loggedInUser && props.post.downvotersId.includes(loggedInUser._id))
         setDownvoted(true);
-    });
-  }, []);
+  }, [loggedInUser, props.post.downvotersId, props.post.upvotersId]);
 
   async function upvotePost() {
-    const loggedInUser = getCookie("user");
     if (!loggedInUser) {
       router.push("/login");
     } else {
-      let cUser: UserType = await getUserById(loggedInUser.toString());
       if (upvoted) {
         setUpvoted(false);
         let removedList = props.post.upvotersId.filter(
-          (u: string) => u != cUser._id
+          (u: string) => u != loggedInUser._id
         );
         props.post.upvotersId = removedList;
         await updatePostById(props.post._id, props.post);
       } else {
         setUpvoted(true);
         setDownvoted(false);
-        props.post.upvotersId.push(cUser._id);
+        props.post.upvotersId.push(loggedInUser._id);
         let removedList = props.post.downvotersId.filter(
-          (u: string) => u != cUser._id
+          (u: string) => u != loggedInUser._id
         );
         props.post.downvotersId = removedList;
         await updatePostById(props.post._id, props.post);
@@ -111,24 +101,22 @@ function PostUpvotes(props: { post: PostType }) {
   }
 
   async function downvotePost() {
-    const loggedInUser = getCookie("user");
     if (!loggedInUser) {
       router.push("/login");
     } else {
-      let cUser: UserType = await getUserById(loggedInUser.toString());
       if (downvoted) {
         setDownvoted(false);
         let removedList = props.post.downvotersId.filter(
-          (u: string) => u != cUser._id
+          (u: string) => u != loggedInUser._id
         );
         props.post.downvotersId = removedList;
         await updatePostById(props.post._id, props.post);
       } else {
         setUpvoted(false);
         setDownvoted(true);
-        props.post.downvotersId.push(cUser._id);
+        props.post.downvotersId.push(loggedInUser._id);
         let removedList = props.post.upvotersId.filter(
-          (u: string) => u != cUser._id
+          (u: string) => u != loggedInUser._id
         );
         props.post.upvotersId = removedList;
         await updatePostById(props.post._id, props.post);
@@ -137,7 +125,7 @@ function PostUpvotes(props: { post: PostType }) {
   }
 
   return (
-    <div className="flex flex-col gap-0 justify-center items-center ">
+    <div className="flex w-8 md:w-10 shrink-0 flex-col gap-1 justify-center items-center ">
       <div onClick={() => upvotePost()}>
         {upvoted ? <UpvotedIcon /> : <UpIcon />}
       </div>
@@ -163,9 +151,10 @@ interface PostInfoProps {
 }
 function PostInfo(props: PostInfoProps) {
   return (
-    <div className="flex w-full flex-col justify-center items-start ">
+    <div className="flex w-full flex-col gap-1 md:gap-2 justify-start items-start ">
       <PostTopLine hideCommunity={props.hideCommunity} post={props.post} />
-      <PostBottomLine post={props.post} />
+      <PostTitle postTitle={props.post.title} postId={props.post._id} />
+      <PostTags tags={props.post.tags} />
     </div>
   );
 }
@@ -176,25 +165,18 @@ interface PostTopLineProps {
 }
 function PostTopLine(props: PostTopLineProps) {
   const [joinStatus, setJoinStatus] = useState(false);
-  const loggedInUser = getCookie("user");
+  const loggedInUser = useContext(UserContext);
+
   useEffect(() => {
-    const fetchData = async () => {
-      let cUser;
       if (loggedInUser) {
-        cUser = await getUserById(loggedInUser.toString());
+        setJoinStatus(loggedInUser.communities.includes(props.post.communityId));
       }
-      return { cUser };
-    };
-    fetchData().then((data) => {
-      if (data.cUser) {
-        setJoinStatus(data.cUser.communities.includes(props.post.communityId));
-      }
-    });
-  }, [props.post.communityId]);
+  }, [loggedInUser, props.post.communityId]);
+
   return (
     <div className="flex w-full justify-between items-center">
       <PosterInfo hideCommunity={props.hideCommunity} post={props.post} />
-      {props.hideCommunity ? (
+      {/* {props.hideCommunity ? (
         <></>
       ) : (
         <JoinButton
@@ -202,7 +184,7 @@ function PostTopLine(props: PostTopLineProps) {
           joinStatus={joinStatus}
           setJoinStatus={setJoinStatus}
         />
-      )}
+      )} */}
     </div>
   );
 }
@@ -213,13 +195,17 @@ interface PosterInfoProps {
 }
 function PosterInfo(props: PosterInfoProps) {
   return (
-    <div className="flex gap-3 justify-start items-baseline">
+    <div className="flex gap-2 md:gap-3 justify-start items-center">
       {props.hideCommunity ? (
         <></>
-      ) : (
-        <PostCommunity commId={props.post.communityId} />
+        ) : (
+        <>
+          <PostCommunity commId={props.post.communityId} />
+          <div className="h-1 w-1 rounded bg-slate-600"></div>
+        </>
       )}
-      <PostUser pUserId={props.post.posterId} />
+      <PostUser posterId={props.post.posterId} />
+      <div className="h-1 w-1 rounded bg-slate-600"></div>
       <PostTime pTimeAgo={moment(props.post.createdAt).fromNow()} />
     </div>
   );
@@ -230,18 +216,18 @@ interface PostCommunityProps {
 }
 function PostCommunity(props: PostCommunityProps) {
   const [postCommunityName, setPostCommunityName] = useState("");
-  const fetchData = async () => {
-    const cName = (await getCommunityById(props.commId)).name;
-    return { cName };
-  };
   useEffect(() => {
+    const fetchData = async () => {
+      const cName = (await getCommunityById(props.commId)).name;
+      return { cName };
+    };
     fetchData().then((data) => {
       setPostCommunityName(data.cName);
     });
-  });
+  },[props.commId]);
   return (
-    <Link href={"/community/" + props.commId}>
-      <a className="text-xs md:text-sm font-semibold hover:text-indigo-600">
+    <Link href={"/community/" + props.commId} legacyBehavior>
+      <a className="text-xs md:text-sm font-semibold hover:text-blue-600">
         c/{postCommunityName}
       </a>
     </Link>
@@ -249,39 +235,28 @@ function PostCommunity(props: PostCommunityProps) {
 }
 
 interface PostUserProps {
-  pUserId: string;
+  posterId: string;
 }
 function PostUser(props: PostUserProps) {
   const [postUserName, setPostUserName] = useState("");
-  const fetchData = async () => {
-    const uName = (await getUserById(props.pUserId)).username;
-    return { uName };
-  };
   useEffect(() => {
+    const fetchData = async () => {
+      const uName = (await getUserById(props.posterId)).username;
+      return { uName };
+    };
     fetchData().then((data) => {
       setPostUserName(data.uName);
     });
-  });
+  },[props.posterId]);
   return (
-    <Link href={"/user/" + props.pUserId} passHref>
-      <p className="text-xs md:text-sm hover:underline whitespace-nowrap">
-        By {postUserName}
-      </p>
+    <Link href={"/user/" + props.posterId} passHref legacyBehavior>
+      <p className="text-xs md:text-sm cursor-pointer hover:underline whitespace-nowrap">{postUserName}</p>
     </Link>
   );
 }
 function PostTime(props: { pTimeAgo: string }) {
   return (
-    <p className="text-[10px] md:text-xs whitespace-nowrap">{props.pTimeAgo}</p>
-  );
-}
-
-function PostBottomLine(props: { post: PostType }) {
-  return (
-    <div className="flex justify-start gap-3 items-end">
-      <PostTitle postTitle={props.post.title} postId={props.post._id} />
-      <PostTags tags={props.post.tags} />
-    </div>
+    <p className="text-xs md:text-sm text-gray-600 whitespace-nowrap">{props.pTimeAgo}</p>
   );
 }
 
@@ -291,8 +266,8 @@ interface PostTitleProps {
 }
 function PostTitle(props: PostTitleProps) {
   return (
-    <Link href={"/post/" + props.postId} passHref>
-      <a className="text-base md:text-lg font-medium hover:text-indigo-600">
+    <Link href={"/post/" + props.postId} passHref legacyBehavior>
+      <a className="text-lg md:text-xl font-medium hover:text-blue-600">
         {props.postTitle}
       </a>
     </Link>
@@ -311,7 +286,7 @@ function PostTags(props: { tags: string[] }) {
 
 function PostTag(props: { tag: string }) {
   return (
-    <div className="px-2 py-1 rounded-xl bg-orange-200 text-[10px] md:text-xs ">
+    <div className="px-2 py-1 rounded-full bg-orange-200 text-[10px] md:text-xs ">
       {props.tag}
     </div>
   );
@@ -319,12 +294,8 @@ function PostTag(props: { tag: string }) {
 
 function PostAttachment(props: { attachmentLink: string }) {
   return (
-    <div className="w-full h-60 bg-gray-200 ">
-      {props.attachmentLink ? (
-        <Image src={props.attachmentLink} alt="" />
-      ) : (
-        <></>
-      )}
+    <div className="w-full h-40 sm:h-60 bg-gray-200 relative">
+      <Image src={props.attachmentLink} alt="" fill={true} />
     </div>
   );
 }
@@ -342,7 +313,7 @@ function PostDescription(props: PostDescriptionProps) {
 
 function PostAction(props: { post: PostType }) {
   return (
-    <div className="w-full flex items-center gap-3 ">
+    <div className="w-full flex items-center justify-between gap-3 ">
       <Comments
         postId={props.post._id}
         postComments={props.post.commentsId.length}
@@ -359,10 +330,10 @@ interface CommentsProps {
 }
 function Comments(props: CommentsProps) {
   return (
-    <Link href={"/post/" + props.postId} passHref>
-      <button className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-indigo-600">
+    <Link href={"/post/" + props.postId} passHref legacyBehavior>
+      <button className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-blue-600">
         <CommentIcon />
-        <CommentCount commentCount={props.postComments} />
+        <p className="text-xs md:text-sm">{props.postComments} Comments</p>
       </button>
     </Link>
   );
@@ -370,7 +341,7 @@ function Comments(props: CommentsProps) {
 
 function Share() {
   return (
-    <div className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-indigo-600">
+    <div className="flex gap-2 cursor-pointer items-center hover:bg-gray-50 p-2 hover:text-blue-600">
       <ShareIcon />
       <p className="text-xs md:text-sm">Share</p>
     </div>
@@ -379,59 +350,42 @@ function Share() {
 
 function Save(props: { postId: string }) {
   const [saved, setSaved] = useState(false);
-  const loggedInUser = getCookie("user");
-  const fetchData = async () => {
-    let cUser;
-    if (loggedInUser) {
-      cUser = await getUserById(loggedInUser.toString());
-    }
-    return { cUser };
-  };
-  useEffect(() => {
-    fetchData().then((data) => {
-      if (data.cUser && data.cUser.savedPostsId.includes(props.postId)) {
+  const loggedInUser = useContext(UserContext);
+
+  useEffect(() => { 
+      if (loggedInUser && loggedInUser.savedPostsId.includes(props.postId)) {
         setSaved(true);
       }
-    });
-  }, []);
+  }, [loggedInUser, props.postId]);
 
   async function savePost() {
-    const loggedInUser = getCookie("user");
     if (!loggedInUser) {
       router.push("/login");
     } else {
-      let cUser: UserType = await getUserById(loggedInUser.toString());
       if (saved) {
         setSaved(false);
-        let removedList = cUser.savedPostsId.filter(
+        let removedList = loggedInUser.savedPostsId.filter(
           (p: string) => p != props.postId
         );
-        cUser.savedPostsId = removedList;
-        await updateUserById(cUser._id, cUser);
+        loggedInUser.savedPostsId = removedList;
+        await updateUserById(loggedInUser._id, loggedInUser);
       } else {
         setSaved(true);
-        cUser.savedPostsId.push(props.postId);
-        await updateUserById(cUser._id, cUser);
+        loggedInUser.savedPostsId.push(props.postId);
+        await updateUserById(loggedInUser._id, loggedInUser);
       }
     }
   }
 
   return (
     <div
-      className="flex gap-2 items-center hover:bg-gray-50 p-2 hover:text-indigo-600"
+      className="flex gap-2 cursor-pointer items-center hover:bg-gray-50 p-2 hover:text-blue-600"
       onClick={() => savePost()}
     >
       {saved ? <SavedIcon /> : <SaveIcon />}
-      <p className={`text-xs md:text-sm ${saved ? "text-indigo-600" : ""}`}>
+      <p className={`text-xs md:text-sm ${saved ? "text-blue-600" : ""}`}>
         {saved ? "Saved" : "Save"}
       </p>
     </div>
   );
-}
-
-interface CommentCountProps {
-  commentCount: number;
-}
-function CommentCount(props: CommentCountProps) {
-  return <p className="text-xs md:text-sm">{props.commentCount} Comments</p>;
 }

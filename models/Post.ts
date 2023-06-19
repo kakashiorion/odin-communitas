@@ -20,6 +20,7 @@ const PostSchema = new mongoose.Schema({
   },
   attachmentLink: {
     type: String,
+    default:""
   },
   upvotersId: {
     type: [mongoose.Schema.Types.ObjectId],

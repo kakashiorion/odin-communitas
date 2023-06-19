@@ -15,6 +15,7 @@ if (!MONGODB_URL) {
  * in development. This prevents connections growing exponentially
  * during API Route usage.
  */
+mongoose.set("strictQuery", false);
 let cached = globalAny.mongoose;
 
 if (!cached) {

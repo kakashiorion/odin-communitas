@@ -8,7 +8,8 @@ export default function CancelButton() {
   };
   return (
     <button
-      className="px-3 h-10 rounded-md bg-gray-600 hover:bg-gray-800 text-white text-xs md:text-sm "
+      // className="px-4 py-3 rounded-full shadow bg-gray-600 hover:bg-gray-800 text-white text-xs md:text-sm"
+      className=" text-gray-600 hover:text-red-800 text-xs md:text-sm"
       onClick={goBack}
     >
       CANCEL
