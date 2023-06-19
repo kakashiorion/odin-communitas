@@ -13,9 +13,12 @@ import {
   getPostsByCommunityId,
 } from "../../util/ServerCalls";
 import { UserContext } from "../_app";
+import Post from "../../models/Post";
+import Community from "../../models/Community";
 
 export async function getStaticPaths() {
-  const results: CommunityType[] = await getCommunities();
+  // const results: CommunityType[] = await getCommunities();
+  const results: CommunityType[] = await Community.find();
 
   return {
     paths: results.map((comm) => {
@@ -28,8 +31,10 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: { params: { id: string } }) {
   return {
     props: {
-      community: await getCommunityById(params.id),
-      posts: await getPostsByCommunityId(params.id),
+      // community: await getCommunityById(params.id),
+      community: await Community.findById(params.id),
+      // posts: await getPostsByCommunityId(params.id),
+      posts: await Post.find({ communityId: params.id }),
     },
   };
 }

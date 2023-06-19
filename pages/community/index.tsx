@@ -11,11 +11,13 @@ import {
   getCommunityById,
 } from "../../util/ServerCalls";
 import { UserContext } from "../_app";
+import Community from "../../models/Community";
 
 export async function getStaticProps() {
   return {
     props: {
-      comms: await getCommunities(),
+      // comms: await getCommunities(),
+      comms: await Community.find(),
     },
   };
 }

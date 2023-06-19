@@ -9,9 +9,11 @@ import {
   getPosts,
 } from "../../util/ServerCalls";
 import { PostType, CommentType } from "../../util/types";
+import Post from "../../models/Post";
 
 export async function getStaticPaths() {
-  const results: PostType[] = await getPosts();
+  // const results: PostType[] = await getPosts();
+  const results: PostType[] = await Post.find();
 
   return {
     paths: results.map((post) => {
@@ -24,7 +26,8 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: { params: { id: string } }) {
   return {
     props: {
-      post: await getPostById(params.id),
+      // post: await getPostById(params.id),
+      post: await Post.findById(params.id),
     },
   };
 }
