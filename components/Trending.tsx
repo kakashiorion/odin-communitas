@@ -14,7 +14,7 @@ export default function Trending(props: { posts: PostType[] }) {
 
 function TrendingList(props: { trendingPosts: PostType[] }) {
   return (
-    <div className="flex w-full justify-start overflow-x-scroll items-center gap-2">
+    <div className="flex w-full justify-start overflow-x-scroll no-scrollbar items-center gap-2">
       {props.trendingPosts.map((p) => (
         <TrendingCard post={p} key={p._id} />
       ))}
