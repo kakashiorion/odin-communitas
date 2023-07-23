@@ -70,7 +70,7 @@ function CommunityData(props: CommunityDataProps) {
         setJoinStatus(loggedInUser.communities.includes(props.comm._id));
       }
     });
-  },[loggedInUser, props.comm._id]);
+  },[loggedInUser, props.comm._id,joinStatus]);
 
   return (
     <div className="py-2 px-6 md:px-8 w-full md:w-[768px]">

@@ -94,7 +94,7 @@ function CommunityItem(props: CommunityItemProps) {
         setJoinStatus(loggedInUser.communities.includes(props.commId));
       }
     });
-  },[loggedInUser, props.commId]);
+  },[loggedInUser, props.commId,joinStatus]);
 
   return (
     <div className="p-3 shadow-md bg-white hover:bg-gray-100 border-[1px] hover:border-blue-600 flex rounded-full w-full items-center justify-between">

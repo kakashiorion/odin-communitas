@@ -23,7 +23,7 @@ export default function AddCommentButton(props: CommentButtonProps) {
   const newComment = new Object({
     content: props.content,
     postId: props.postId,
-    parentCommentId: props.parentCommentId??null,
+    parentCommentId: props.parentCommentId??"",
   });
 
   async function createNewParentComment(newCommentObj: any) {

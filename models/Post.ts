@@ -8,7 +8,6 @@ const PostSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: true,
   },
   communityId: {
     type: mongoose.Schema.Types.ObjectId, //Community in which the post was made

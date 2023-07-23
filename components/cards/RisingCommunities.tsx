@@ -8,9 +8,10 @@ import { RisingIcon } from "../icons/Icons";
 function sortRisingComm(c: CommunityType[]) {
   const now = new Date();
   const risingSortDays = 3000;
+  const risingSortMembers = 1;
   return c
     .filter(
-      (p) => moment(now).diff(moment(p.createdAt), "days") < risingSortDays
+      (p) => moment(now).diff(moment(p.createdAt), "days") < risingSortDays && p.members.length>=risingSortMembers
     )
     .sort((a: CommunityType, b: CommunityType) =>
       a.members.length < b.members.length ? 1 : -1

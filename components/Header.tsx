@@ -140,6 +140,7 @@ function UserDropDown(props: { userId?: string }) {
   const logOut = () => {
     removeCookies("user");
     router.push("/");
+    router.reload();
   };
 
   const viewProfile = () => {

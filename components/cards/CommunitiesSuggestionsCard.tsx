@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CommunityType } from "../../util/types";
 import { getCommunities } from "../../util/ServerCalls";
 
+//Fetch top 6
 function sortPopularComm(c: CommunityType[], cat?: string) {
   if (cat) {
     return c
