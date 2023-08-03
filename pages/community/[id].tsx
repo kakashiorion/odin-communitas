@@ -5,37 +5,51 @@ import PostCard from "../../components/cards/PostCard";
 import Header from "../../components/Header";
 import { BackIcon } from "../../components/icons/Icons";
 import commImage from "../../public/commDefault.jpeg";
-import { CommunityType, PostType } from "../../util/types";
+import { CommunityType, PostType, newCommunity } from "../../util/types";
 import { useContext, useEffect, useState } from "react";
 import {
-  getCommunityById,
+  getCommunityById, getPostsByCommunityId,
 } from "../../util/ServerCalls";
 import { UserContext } from "../_app";
-import Post from "../../models/Post";
-import Community from "../../models/Community";
+// import mongoose from "mongoose";
+// import Post from "../../models/Post";
+// import Community from "../../models/Community";
 
 export async function getServerSideProps({ params }: { params: { id: string } }) {
   return {
     props: {
-      community: JSON.parse(JSON.stringify(await Community.findById(params.id))),
-      posts: JSON.parse(JSON.stringify(await Post.find({ communityId: params.id }))),
+      id: params.id,
+      // community: JSON.parse(JSON.stringify(await Community.findById(params.id))),
+      // posts: JSON.parse(JSON.stringify(await Post.find({ communityId: params.id }))),
     },
   };
 }
 
 interface CommunityPageProps {
-  community: CommunityType;
-  posts: PostType[];
+  // community: CommunityType;
+  // posts: PostType[];
+  id:string
 }
 export default function CommunityPage(props: CommunityPageProps) {
-  const posts: PostType[] = props.posts;
+  // const posts: PostType[] = props.posts;
+  const [commData, setCommData]= useState<CommunityType>(newCommunity)
+
+  useEffect(() =>{
+    const fetchData = async () => {
+      const response2 = await getCommunityById(props.id)
+      setCommData(response2)
+    }
+    fetchData()
+  },[props.id])
 
   return (
     <div className="flex flex-col gap-4 items-center">
       <Header />
       <AllCommunitiesBackLink />
-      <CommunityData comm={props.community} />
-      <CommunityContent posts={posts} />
+      {/* <CommunityData comm={props.community} />
+      <CommunityContent posts={posts} /> */}
+      <CommunityData comm={commData} />
+      <CommunityContent id={props.id} />
     </div>
   );
 }
@@ -65,7 +79,9 @@ function CommunityData(props: CommunityDataProps) {
       return { community };
     };
     fetchData().then((data) => {
-      setCommMemberCount(data.community.members.length);
+      if (props.comm._id){
+        setCommMemberCount(data.community.members.length);
+      }
       if (loggedInUser) {
         setJoinStatus(loggedInUser.communities.includes(props.comm._id));
       }
@@ -157,17 +173,30 @@ function sortPosts(c: PostType[], sAlgo: string) {
 }
 
 interface CommunityContentProps {
-  posts: PostType[];
+  id: string;
 }
 function CommunityContent(props: CommunityContentProps) {
   const [sortAlgo, setSortAlgo] = useState("New"); //Sort content by 'New' by default
+  const [postsData, setPostsData]= useState<PostType[]>([])
+
+  useEffect(() =>{
+    const fetchData = async () => {
+      const posts = await getPostsByCommunityId(props.id)
+      return {posts}
+    }
+    if (props.id!=""){
+      fetchData().then((data) => {
+        setPostsData(data.posts);
+      });
+    }
+  },[props.id])
 
   return (
     <div className="p-2 px-6 md:px-8 w-full md:w-[768px]">
       <div className="p-1 flex flex-col justify-start gap-4 items-center ">
         <PostsSorter setSort={setSortAlgo} />
       </div>
-      <CommunityPosts posts={sortPosts(props.posts, sortAlgo)} />
+      <CommunityPosts posts={sortPosts(postsData, sortAlgo)} />
     </div>
   );
 }

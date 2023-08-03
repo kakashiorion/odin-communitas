@@ -7,18 +7,19 @@ import NewCommunityButton from "../../components/buttons/NewCommunityButton";
 import { CommunityType } from "../../util/types";
 import { useContext, useEffect, useState } from "react";
 import {
+  getCommunities,
   getCommunityById,
 } from "../../util/ServerCalls";
 import { UserContext } from "../_app";
-import Community from "../../models/Community";
+// import Community from "../../models/Community";
 
-export async function getServerSideProps() {
-  return {
-    props: {
-      comms: JSON.parse(JSON.stringify(await Community.find())),
-    },
-  };
-}
+// export async function getServerSideProps() {
+//   return {
+//     props: {
+//       comms: JSON.parse(JSON.stringify(await Community.find())),
+//     },
+//   };
+// }
 
 function sortComm(c: CommunityType[], sAlgo: string) {
   if (sAlgo == "Name")
@@ -40,17 +41,27 @@ function sortComm(c: CommunityType[], sAlgo: string) {
 }
 
 interface AllCommunityPageProps {
-  comms: CommunityType[];
+  // comms: CommunityType[];
 }
 export default function AllCommunityPage(props: AllCommunityPageProps) {
-  const [sort, setSort] = useState("Name"); //Sort communities by 'Name' by default
+  const [data, setData]= useState<CommunityType[]>([])
+  //Sort communities by 'Name' by default
+  const [sort, setSort] = useState("Name"); 
+
+  useEffect(() =>{
+    const fetchData = async () => {
+      const response = await getCommunities()
+      setData(response)
+    }
+    fetchData()
+  },[])
 
   return (
     <div className="flex flex-col gap-4 items-center">
       <Header />
       <div className="flex flex-col p-6 gap-2 justify-start items-center md:w-[768px] w-full ">
         <CommunitiesSorter setSort={setSort} />
-        {sortComm(props.comms, sort).map((comm: CommunityType) => (
+        {sortComm(data, sort).map((comm: CommunityType) => (
           <CommunityItem
             key={comm._id}
             commId={comm._id}

@@ -51,3 +51,46 @@ export interface UserType {
   savedCommentsId: string[];
   createdAt: Date;
 }
+
+export const newPost:PostType = {
+  _id:'',
+  commentsId: [],
+  downvotersId:[],
+  upvotersId: [],
+  title: '',
+  description: '',
+  communityId: '',
+  posterId: '',
+  attachmentLink: '',
+  tags: [],
+  createdAt:new Date()
+}
+
+export const newCommunity: CommunityType= {
+  _id: '',
+  name: '',
+  creatorId: '',
+  description: '',
+  category: '',
+  imageUrl: '',
+  members: [],
+  createdAt: new Date()
+}
+
+export const  newUser:UserType = {
+  _id: '',
+  username: '',
+  email: '',
+  accessToken: '',
+  tokens: [],
+  googleId: '',
+  githubId: '',
+  encryptedPassword: '',
+  profileImageUrl: '',
+  communities: [],
+  posts: [],
+  comments: [],
+  savedPostsId: [],
+  savedCommentsId: [],
+  createdAt: new Date(),
+}

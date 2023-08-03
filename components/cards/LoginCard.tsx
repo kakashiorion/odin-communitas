@@ -14,8 +14,8 @@ export default function LoginCard() {
 }
 
 function LoginContent() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("trevize");
+  const [password, setPassword] = useState("12345678");
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   return (
@@ -31,6 +31,7 @@ function LoginContent() {
         setPassword={setPassword}
         passwordError={passwordError}
         setPasswordError={setPasswordError}
+        password={password}
       />
       <LoginActionButton
         username={username}
@@ -77,6 +78,7 @@ function EnterPassword(props: {
   setPassword: (s: string) => void;
   setPasswordError: (b: boolean) => void;
   passwordError: boolean;
+  password: string
 }) {
   return (
     <div className="w-3/4 sm:w-1/2 lg:w-2/3">
@@ -85,6 +87,7 @@ function EnterPassword(props: {
         className="flex text-sm md:text-base items-center rounded-full focus:border-blue-600 bg-stone-100 w-full px-4 py-2"
         placeholder="Enter your password"
         id="password"
+        value={props.password}
         onChange={(e) => {
           props.setPassword(e.target.value);
           props.setPasswordError(false);

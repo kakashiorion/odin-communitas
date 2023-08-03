@@ -67,7 +67,7 @@ function RisingCommunity(props: RisingCommunityProps) {
           c/{props.commName}
         </a>
       </Link>
-      <p>{props.commMembers+'k'}</p>
+      <p>{props.commMembers}</p>
     </div>
   );
 }

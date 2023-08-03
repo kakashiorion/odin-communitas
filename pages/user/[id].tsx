@@ -7,28 +7,44 @@ import defaultProfileImage from "../../public/defaultProfilePic.webp";
 import {
   getCommentsByUserId,
   getPostsByUserId,
+  getUserById,
 } from "../../util/ServerCalls";
-import { PostType, UserType, CommentType } from "../../util/types";
+import { PostType, UserType, CommentType, newUser } from "../../util/types";
 import moment from "moment";
-import User from "../../models/User";
+// import User from "../../models/User";
 
 export async function getServerSideProps({ params }: { params: { id: string } }) {
   return {
     props: {
-      user: JSON.parse(JSON.stringify(await User.findById(params.id))),
+      id: params.id,
+      // user: JSON.parse(JSON.stringify(await User.findById(params.id))),
     },
   };
 }
 
 interface ProfilePageProps {
-  user: UserType;
+  // user: UserType;
+  id:string
 }
 export default function ProfilePage(props: ProfilePageProps) {
+
+  const [data, setData]= useState(newUser)
+  
+  
+  useEffect(() =>{
+    const fetchData = async () => {
+      await getUserById(props.id).then(d=>setData(d))
+    }
+    fetchData()
+  },[props.id])
+
   return (
     <div className="flex flex-col gap-3 md:gap-4 items-center">
       <Header />
-      <ProfileSection user={props.user} />
-      <UserContent user={props.user} />
+      {/* <ProfileSection user={props.user} />
+      <UserContent user={props.user} /> */}
+      <ProfileSection user={data} />
+      <UserContent user={data} />
     </div>
   );
 }
@@ -83,7 +99,7 @@ export function ProfileAvatar(props: ProfileAvatarProps) {
     <div className="h-20 md:h-24 w-20 md:w-24 relative">
       <Image
         className="rounded-full"
-        src={props.userImageUrl ?? defaultProfileImage}
+        src={(props.userImageUrl!=""? props.userImageUrl: defaultProfileImage) ??defaultProfileImage} 
         alt="Profile Image"
         fill={true}
       />
@@ -197,17 +213,18 @@ interface PostsContentProps {
   user: UserType;
 }
 export function PostsContent(props: PostsContentProps) {
-  const emptyPosts: PostType[] = [];
-  const [userPosts, setUserPosts] = useState(emptyPosts);
+  const [userPosts, setUserPosts] = useState<PostType[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       const posts = await getPostsByUserId(props.user._id);
       return { posts };
     };
-    fetchData().then((data) => {
-      setUserPosts(data.posts);
-    });
+    if(props.user._id !="") {
+      fetchData().then((data) => {
+        setUserPosts(data.posts);
+      });
+    }
   },[props.user._id]);
   return (
     <div className="flex flex-col rounded-b-xl gap-3 w-full justify-center">

@@ -4,27 +4,41 @@ import CommentCard from "../../components/cards/CommentCard";
 import PostCard from "../../components/cards/PostCard";
 import Header from "../../components/Header";
 import {
-  getParentCommentsByPostId,
+  getParentCommentsByPostId, getPostById,
 } from "../../util/ServerCalls";
-import { PostType, CommentType } from "../../util/types";
-import Post from "../../models/Post";
+import { PostType, CommentType, newPost } from "../../util/types";
+// import Post from "../../models/Post";
 
 export async function getServerSideProps({ params }: { params: { id: string } }) {
+  
   return {
     props: {
-      post: JSON.parse(JSON.stringify(await Post.findById(params.id))),
+      id: params.id,
+      // post: await Post.findById(params.id).json(),
     },
   };
 }
 
 interface PostPageProps {
-  post: PostType;
+  // post: PostType;
+  id:string
 }
 export default function PostPage(props: PostPageProps) {
+
+  const [data, setData]= useState<PostType>(newPost)
+  
+  
+  useEffect(() =>{
+    const fetchData = async () => {
+      await getPostById(props.id).then(d=>setData(d))
+    }
+    fetchData()
+  },[props.id])
+
   return (
     <div className="flex flex-col gap-4 items-center">
       <Header />
-      <PostColumn post={props.post} />
+      <PostColumn post={data} />
     </div>
   );
 }
