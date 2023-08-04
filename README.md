@@ -6,7 +6,7 @@ A social media content discussion web platform (lightweight Reddit) built with N
 
 This app can be run live on the website:
 
-#https://odin-communitas.vercel.app/
+https://odin-communitas.vercel.app/
 
 >(For quick login, username: trevize, password: 12345678)
 
