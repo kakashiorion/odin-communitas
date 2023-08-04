@@ -2,6 +2,8 @@
 
 A social media content discussion web platform (lightweight Reddit) built with NextJS.
 
+![Communitas Logo](/public/LogoOrig.svg)
+
 ## About
 
 This app can be run live on the website:
