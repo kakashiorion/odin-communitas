@@ -1,8 +1,16 @@
 # Welcome to Communitas!
 
-A social media content discussion web platform (lightweight Reddit) built with NextJS.
+A social media content discussion web platform (lightweight Reddit)
 
-![Communitas Logo](/public/LogoOrig.svg)
+![Cover image](/public/CM_BG.png)
+
+## Technologies
+
+This web app was built with NextJS (Pages router).
+
+Uses MongoDB as the database and Mongoose library for data modelling.
+
+Also, uses TailwindCSS for styling.
 
 ## About
 
